@@ -71,7 +71,7 @@ inventory::collect!(ToolMeta);
 
 fn strip_numeric_formats(schema: &mut serde_json::Value) {
     if let serde_json::Value::Object(map) = schema {
-        let is_numeric = map.get("type").map_or(false, |t| {
+        let is_numeric = map.get("type").is_some_and(|t| {
             if let Some(s) = t.as_str() {
                 s == "integer" || s == "number"
             } else if let Some(arr) = t.as_array() {
