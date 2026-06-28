@@ -1,3 +1,4 @@
+pub mod dpapi;
 pub mod ps_escape;
 pub mod resources;
 pub mod server;
