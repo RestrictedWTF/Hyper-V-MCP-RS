@@ -1,0 +1,7 @@
+/target
+AGENTS.md
+AGENT_PROMPT.md
+CMDletsFormatted.md
+docs/
+*.py
+
