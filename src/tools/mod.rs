@@ -128,6 +128,7 @@ pub mod new_vm_san;
 pub mod new_vm_switch;
 pub mod optimize_vhd;
 pub mod optimize_vhd_set;
+pub mod register_vm_credential;
 pub mod remove_vhd_snapshot;
 pub mod remove_vm;
 pub mod remove_vm_assignable_device;
