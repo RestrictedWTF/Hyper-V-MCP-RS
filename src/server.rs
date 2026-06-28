@@ -70,8 +70,7 @@ impl ServerHandler for HypervServer {
                 let input = serde_json::Value::Object(request.arguments.unwrap_or_default());
                 match (meta.run)(&self.ctx, input).await {
                     Ok(value) => {
-                        let text = serde_json::to_string_pretty(&value).unwrap_or_default();
-                        return Ok(CallToolResult::success(vec![Content::text(text)]));
+                        return Ok(CallToolResult::structured(value));
                     }
                     Err(e) => {
                         error!("tool {} failed: {}", name, e);
