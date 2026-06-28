@@ -2,8 +2,9 @@ use crate::dpapi::{decrypt_from_base64, encrypt_to_base64};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use thiserror::Error;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct EncryptedCredential {
     pub username: String,
     pub password_encrypted: String,
@@ -22,7 +23,7 @@ impl EncryptedCredential {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct Config {
     #[serde(default)]
     pub default_credential: Option<EncryptedCredential>,
@@ -32,7 +33,7 @@ pub struct Config {
     pub powershell_direct_timeout_seconds: Option<u64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct CredentialStore {
     #[serde(default)]
     pub vms: HashMap<String, EncryptedCredential>,
@@ -44,7 +45,18 @@ pub struct ResolvedCredential {
     pub password: String,
 }
 
+#[derive(Debug, Error)]
+pub enum ConfigError {
+    #[error("failed to read config file: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("failed to parse config JSON: {0}")]
+    Json(#[from] serde_json::Error),
+}
+
 pub fn app_data_dir() -> PathBuf {
+    if let Ok(dir) = std::env::var("HYPERV_MCP_CONFIG_DIR") {
+        return PathBuf::from(dir);
+    }
     std::env::var("APPDATA")
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
@@ -71,15 +83,14 @@ fn ensure_app_dir() -> std::io::Result<()> {
 }
 
 impl Config {
-    pub fn load() -> Self {
+    pub fn load() -> Result<Self, ConfigError> {
         let path = config_path();
         if !path.exists() {
-            return Self::default();
+            return Ok(Self::default());
         }
-        match std::fs::read_to_string(&path) {
-            Ok(text) => serde_json::from_str(&text).unwrap_or_default(),
-            Err(_) => Self::default(),
-        }
+        let text = std::fs::read_to_string(&path)?;
+        let config = serde_json::from_str(&text)?;
+        Ok(config)
     }
 
     pub fn save(&self) -> std::io::Result<()> {
@@ -91,15 +102,14 @@ impl Config {
 }
 
 impl CredentialStore {
-    pub fn load() -> Self {
+    pub fn load() -> Result<Self, ConfigError> {
         let path = credentials_path();
         if !path.exists() {
-            return Self::default();
+            return Ok(Self::default());
         }
-        match std::fs::read_to_string(&path) {
-            Ok(text) => serde_json::from_str(&text).unwrap_or_default(),
-            Err(_) => Self::default(),
-        }
+        let text = std::fs::read_to_string(&path)?;
+        let store = serde_json::from_str(&text)?;
+        Ok(store)
     }
 
     pub fn save(&self) -> std::io::Result<()> {
@@ -121,9 +131,23 @@ pub struct ConfigManager {
 
 impl ConfigManager {
     pub fn load() -> Self {
+        let config = match Config::load() {
+            Ok(cfg) => cfg,
+            Err(err) => {
+                tracing::warn!("failed to load config, using defaults: {err}");
+                Config::default()
+            }
+        };
+        let credentials = match CredentialStore::load() {
+            Ok(store) => store,
+            Err(err) => {
+                tracing::warn!("failed to load credentials, using defaults: {err}");
+                CredentialStore::default()
+            }
+        };
         Self {
-            config: Config::load(),
-            credentials: CredentialStore::load(),
+            config,
+            credentials,
         }
     }
 
@@ -165,34 +189,74 @@ impl ConfigManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::Path;
+    use std::sync::Mutex;
+
+    static CONFIG_DIR_LOCK: Mutex<()> = Mutex::new(());
+
+    fn with_config_dir<F, R>(dir: &Path, f: F) -> R
+    where
+        F: FnOnce() -> R,
+    {
+        let _guard = CONFIG_DIR_LOCK.lock().unwrap();
+        let var_name = "HYPERV_MCP_CONFIG_DIR";
+        let previous = std::env::var_os(var_name);
+        std::env::set_var(var_name, dir.as_os_str());
+        let result = f();
+        match previous {
+            Some(value) => std::env::set_var(var_name, value),
+            None => std::env::remove_var(var_name),
+        }
+        result
+    }
 
     #[test]
     fn config_round_trip() {
         let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("config.json");
-        let config = Config {
-            default_credential: Some(EncryptedCredential::encrypt("Admin", "Pass").unwrap()),
-            default_vhdx_path: Some("C:\\Base.vhdx".to_string()),
-            powershell_direct_timeout_seconds: Some(120),
-        };
-        let text = serde_json::to_string_pretty(&config).unwrap();
-        std::fs::write(&path, text).unwrap();
-        let loaded: Config =
-            serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
-        assert_eq!(loaded.default_vhdx_path, config.default_vhdx_path);
-        assert_eq!(
-            loaded.powershell_direct_timeout_seconds,
-            config.powershell_direct_timeout_seconds
-        );
-        assert_eq!(
-            loaded
-                .default_credential
-                .as_ref()
-                .unwrap()
-                .decrypt_password()
-                .unwrap(),
-            "Pass"
-        );
+        with_config_dir(dir.path(), || {
+            let config = Config {
+                default_credential: Some(EncryptedCredential::encrypt("Admin", "Pass").unwrap()),
+                default_vhdx_path: Some("C:\\Base.vhdx".to_string()),
+                powershell_direct_timeout_seconds: Some(120),
+            };
+            config.save().unwrap();
+            let loaded = Config::load().unwrap();
+            assert_eq!(loaded, config);
+        });
+    }
+
+    #[test]
+    fn missing_config_file_returns_default() {
+        let dir = tempfile::tempdir().unwrap();
+        with_config_dir(dir.path(), || {
+            let loaded = Config::load().unwrap();
+            assert_eq!(loaded, Config::default());
+        });
+    }
+
+    #[test]
+    fn malformed_config_json_returns_error() {
+        let dir = tempfile::tempdir().unwrap();
+        with_config_dir(dir.path(), || {
+            std::fs::write(config_path(), "not valid json {").unwrap();
+            let result = Config::load();
+            assert!(matches!(result, Err(ConfigError::Json(_))));
+        });
+    }
+
+    #[test]
+    fn credential_store_round_trip() {
+        let dir = tempfile::tempdir().unwrap();
+        with_config_dir(dir.path(), || {
+            let mut store = CredentialStore::default();
+            store.set(
+                "VM1",
+                EncryptedCredential::encrypt("VmUser", "VmPass").unwrap(),
+            );
+            store.save().unwrap();
+            let loaded = CredentialStore::load().unwrap();
+            assert_eq!(loaded, store);
+        });
     }
 
     #[test]
