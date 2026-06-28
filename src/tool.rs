@@ -65,12 +65,40 @@ pub struct ToolMeta {
 
 inventory::collect!(ToolMeta);
 
+fn strip_numeric_formats(schema: &mut serde_json::Value) {
+    if let serde_json::Value::Object(map) = schema {
+        let is_numeric = map.get("type").map_or(false, |t| {
+            if let Some(s) = t.as_str() {
+                s == "integer" || s == "number"
+            } else if let Some(arr) = t.as_array() {
+                arr.iter().any(|v| v.as_str() == Some("integer") || v.as_str() == Some("number"))
+            } else {
+                false
+            }
+        });
+        if is_numeric {
+            map.remove("format");
+        }
+        for value in map.values_mut() {
+            strip_numeric_formats(value);
+        }
+    } else if let serde_json::Value::Array(arr) = schema {
+        for value in arr.iter_mut() {
+            strip_numeric_formats(value);
+        }
+    }
+}
+
 pub fn input_schema<T: HyperVTool>() -> serde_json::Value {
-    serde_json::to_value(schemars::schema_for!(T::Input)).unwrap()
+    let mut schema = serde_json::to_value(schemars::schema_for!(T::Input)).unwrap();
+    strip_numeric_formats(&mut schema);
+    schema
 }
 
 pub fn output_schema<T: HyperVTool>() -> serde_json::Value {
-    serde_json::to_value(schemars::schema_for!(T::Output)).unwrap()
+    let mut schema = serde_json::to_value(schemars::schema_for!(T::Output)).unwrap();
+    strip_numeric_formats(&mut schema);
+    schema
 }
 
 pub fn run_tool<T: HyperVTool>(
