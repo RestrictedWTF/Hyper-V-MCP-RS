@@ -85,6 +85,53 @@ Read-only inventory and topology data, polled on demand:
 
 ---
 
+## Guest Control
+
+PowerShell Direct tools allow the agent to execute commands and transfer files inside a running VM over VMBus — no network connectivity required.
+
+### Credential Resolution
+
+Guest tools resolve credentials in this order:
+
+1. Explicit `username` / `password` supplied in the tool call
+2. VM-specific entry in the DPAPI-encrypted credential store (`%APPDATA%\hyperv-mcp\credentials.json`)
+3. Default credential from the MCP config file (`%APPDATA%\hyperv-mcp\config.json`)
+4. Error — call `hyperv_register_vm_credential` to register credentials for the VM
+
+### Config File
+
+`%APPDATA%\hyperv-mcp\config.json` is read at startup and holds the default guest credential:
+
+```json
+{
+  "default_credential": {
+    "username": "Administrator",
+    "password": "<DPAPI-encrypted blob>"
+  }
+}
+```
+
+This is intended for use with a known base VHDX whose local admin password is fixed. All agent-created VMs are assumed to derive from this image.
+
+### Credential Store
+
+Per-VM credentials are stored in `%APPDATA%\hyperv-mcp\credentials.json`, DPAPI-encrypted at rest. Entries are keyed by VM name. Use `hyperv_register_vm_credential` to add or update entries.
+
+### Session Model
+
+Each guest tool call creates its own transient PowerShell Direct session, performs the operation, and tears it down. No session IDs are exposed to the agent.
+
+### Guest Tools
+
+| Tool | Description |
+|---|---|
+| `hyperv_invoke_guest_command` | Runs a PowerShell script block inside the guest via `Invoke-Command -VMName`. Returns stdout, stderr, and exit code as JSON. |
+| `hyperv_copy_to_guest` | Copies a file from the host into the guest using a transient `PSSession`. |
+| `hyperv_copy_from_guest` | Copies a file from the guest to the host using a transient `PSSession`. |
+| `hyperv_register_vm_credential` | Stores a username/password for a specific VM in the DPAPI-encrypted credential store. |
+
+---
+
 ## Tools
 
 Every Hyper-V cmdlet is exposed as a typed MCP tool. Tool names follow the pattern `hyperv_<verb>_<noun>` (e.g. `hyperv_get_vm`, `hyperv_start_vm`, `hyperv_new_vhd`).
@@ -436,9 +483,16 @@ hyperv-mcp/
     ├── resources.rs              # hyperv:// resource handlers
     ├── ps_escape.rs              # PowerShell string escaping
     ├── mcp_content.rs            # MCP content helpers
+    ├── config.rs                 # MCP config file load (%APPDATA%\hyperv-mcp\config.json)
+    ├── credentials.rs            # DPAPI credential store (%APPDATA%\hyperv-mcp\credentials.json)
+    ├── dpapi.rs                  # CryptProtectData / CryptUnprotectData helpers
     └── tools/
         ├── mod.rs                # pub mod declarations (orchestrator-managed)
         ├── get_vm.rs             # Reference tool
+        ├── invoke_guest_command.rs
+        ├── copy_to_guest.rs
+        ├── copy_from_guest.rs
+        ├── register_vm_credential.rs
         └── <verb>_<noun>.rs      # One file per cmdlet
 ```
 
@@ -456,6 +510,7 @@ hyperv-mcp/
 | `thiserror` | Structured error types |
 | `tracing` / `tracing-subscriber` | Logging to stderr |
 | `async-trait` | Async trait support |
+| `windows` | DPAPI bindings (`Win32_Security_Cryptography`, `Win32_Foundation`) |
 
 ---
 
