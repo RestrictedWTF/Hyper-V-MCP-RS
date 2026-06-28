@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SuspendVmInput {
     /// Name of the virtual machine to suspend.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

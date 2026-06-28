@@ -37,7 +37,6 @@ pub struct CompareVmOutput {
     pub results: Vec<VmCompatibilityInfo>,
 }
 
-
 #[derive(Default)]
 pub struct CompareVmTool;
 
@@ -51,20 +50,29 @@ impl HyperVTool for CompareVmTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Compare-VM".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(path) = &input.path {
             if path.trim().is_empty() {
-                return Err(ToolError::InvalidInput("path must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "path must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Path '{}'", escape_ps_string(path)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object VMName, VMId, ComputerName, Compatible, IncompatibilityMessages | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -86,22 +94,26 @@ impl HyperVTool for CompareVmTool {
         let mut output = Vec::with_capacity(items.len());
         for item in items {
             let incompatibility_messages = match &item["IncompatibilityMessages"] {
-                serde_json::Value::Array(arr) => arr.iter().map(|v| v.as_str().unwrap_or_default().to_string()).collect(),
+                serde_json::Value::Array(arr) => arr
+                    .iter()
+                    .map(|v| v.as_str().unwrap_or_default().to_string())
+                    .collect(),
                 _ => Vec::new(),
             };
             output.push(VmCompatibilityInfo {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 compatible: item["Compatible"].as_bool().unwrap_or_default(),
                 incompatibility_messages,
             });
         }
 
         Ok(CompareVmOutput { results: output })
-
     }
 }
-
 
 register_tool!(CompareVmTool);

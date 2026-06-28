@@ -126,7 +126,6 @@ impl HyperVTool for SetVmNetworkAdapterIsolationTool {
             args.push(format!("-MultiTenantStack '{}'", escape_ps_string(stack)));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              @{{N='IsolationMode';E={{$_.IsolationMode.ToString()}}}}, \

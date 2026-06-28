@@ -151,7 +151,6 @@ impl HyperVTool for AddVmNetworkAdapterRoutingDomainMappingTool {
             }
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              @{{N='RoutingDomainId';E={{$_.RoutingDomainId.ToString()}}}}, \

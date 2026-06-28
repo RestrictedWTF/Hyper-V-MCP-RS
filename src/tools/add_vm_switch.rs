@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct AddVmSwitchInput {
     /// Name of the virtual switch to add to the Ethernet resource pool.
-pub name: String,
+    pub name: String,
     /// Name of the Ethernet resource pool to which the virtual switch is added.
     #[serde(rename = "resourcePoolName")]
     pub resource_pool_name: String,
@@ -118,9 +118,7 @@ impl HyperVTool for AddVmSwitchTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                allow_management_os: switch["AllowManagementOS"]
-                    .as_bool()
-                    .unwrap_or_default(),
+                allow_management_os: switch["AllowManagementOS"].as_bool().unwrap_or_default(),
                 computer_name: switch["ComputerName"]
                     .as_str()
                     .unwrap_or_default()

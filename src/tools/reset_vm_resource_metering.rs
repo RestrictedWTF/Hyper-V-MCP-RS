@@ -29,7 +29,8 @@ pub struct ResetVmResourceMeteringTool;
 #[async_trait]
 impl HyperVTool for ResetVmResourceMeteringTool {
     const NAME: &'static str = "hyperv_reset_vm_resource_metering";
-    const DESCRIPTION: &'static str = "Resets the resource utilization data collected by Hyper-V resource metering.";
+    const DESCRIPTION: &'static str =
+        "Resets the resource utilization data collected by Hyper-V resource metering.";
     type Input = ResetVmResourceMeteringInput;
     type Output = ResetVmResourceMeteringOutput;
 
@@ -37,27 +38,38 @@ impl HyperVTool for ResetVmResourceMeteringTool {
         let mut args = vec!["Reset-VMResourceMetering".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(resource_pool_name) = &input.resource_pool_name {
             if resource_pool_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("resource_pool_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "resource_pool_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ResourcePoolName '{}'", escape_ps_string(resource_pool_name)));
+            args.push(format!(
+                "-ResourcePoolName '{}'",
+                escape_ps_string(resource_pool_name)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -65,6 +77,5 @@ impl HyperVTool for ResetVmResourceMeteringTool {
         Ok(ResetVmResourceMeteringOutput { success: true })
     }
 }
-
 
 register_tool!(ResetVmResourceMeteringTool);

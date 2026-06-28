@@ -31,7 +31,6 @@ pub struct EnableVmTpmOutput {
     pub vms: Vec<EnableVmTpmInfo>,
 }
 
-
 #[derive(Default)]
 pub struct EnableVmTpmTool;
 
@@ -45,14 +44,21 @@ impl HyperVTool for EnableVmTpmTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Enable-VMTPM".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         args.push("-PassThru".to_string());
@@ -83,7 +89,6 @@ impl HyperVTool for EnableVmTpmTool {
                 memory_assigned: vm["MemoryAssigned"].as_u64().unwrap_or_default(),
             });
         }
-
 
         Ok(EnableVmTpmOutput { vms: output })
     }

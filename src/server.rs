@@ -19,7 +19,10 @@ impl HypervServer {
         let sidecar = Arc::new(SidecarClient::new().await?);
         let config = Arc::new(ConfigManager::load());
         let timeout = Duration::from_secs(
-            config.config.powershell_direct_timeout_seconds.unwrap_or(30),
+            config
+                .config
+                .powershell_direct_timeout_seconds
+                .unwrap_or(30),
         );
         Ok(Self {
             ctx: ToolContext {

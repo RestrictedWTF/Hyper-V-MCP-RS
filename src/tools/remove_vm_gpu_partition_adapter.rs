@@ -36,26 +36,37 @@ impl HyperVTool for RemoveVmGpuPartitionAdapterTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Remove-VMGpuPartitionAdapter".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(instance_path) = &input.instance_path {
             if instance_path.trim().is_empty() {
-                return Err(ToolError::InvalidInput("instance_path must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "instance_path must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-InstancePath '{}'", escape_ps_string(instance_path)));
+            args.push(format!(
+                "-InstancePath '{}'",
+                escape_ps_string(instance_path)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -63,6 +74,5 @@ impl HyperVTool for RemoveVmGpuPartitionAdapterTool {
         Ok(RemoveVmGpuPartitionAdapterOutput { success: true })
     }
 }
-
 
 register_tool!(RemoveVmGpuPartitionAdapterTool);

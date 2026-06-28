@@ -41,7 +41,6 @@ pub struct GetVmGroupOutput {
     pub groups: Vec<VmGroupInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmGroupTool;
 
@@ -56,15 +55,22 @@ impl HyperVTool for GetVmGroupTool {
         let mut args = vec!["Get-VMGroup".to_string()];
         if let Some(name) = &input.name {
             if name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Name '{}'", escape_ps_string(name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='GroupType';E={{$_.GroupType.ToString()}}}}, VMMembers, VMGroupMembers, ComputerName | ConvertTo-Json -Compress -Depth 10", args.join(" "));
@@ -89,10 +95,8 @@ impl HyperVTool for GetVmGroupTool {
         }
 
         Ok(GetVmGroupOutput { groups: output })
-
     }
 }
-
 
 fn parse_member_array(value: &serde_json::Value) -> Vec<VmGroupMemberInfo> {
     match value {
@@ -114,7 +118,10 @@ fn parse_vm_group_info(value: &serde_json::Value) -> VmGroupInfo {
         group_type: value["GroupType"].as_str().unwrap_or_default().to_string(),
         vm_members: parse_member_array(&value["VMMembers"]),
         vm_group_members: parse_member_array(&value["VMGroupMembers"]),
-        computer_name: value["ComputerName"].as_str().unwrap_or_default().to_string(),
+        computer_name: value["ComputerName"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
     }
 }
 

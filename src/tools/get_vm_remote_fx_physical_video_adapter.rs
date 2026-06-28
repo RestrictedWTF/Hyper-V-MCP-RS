@@ -28,14 +28,14 @@ pub struct GetVmRemoteFxPhysicalVideoAdapterOutput {
     pub adapters: Vec<VmRemoteFxPhysicalVideoAdapterInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmRemoteFxPhysicalVideoAdapterTool;
 
 #[async_trait]
 impl HyperVTool for GetVmRemoteFxPhysicalVideoAdapterTool {
     const NAME: &'static str = "hyperv_get_vm_remote_fx_physical_video_adapter";
-    const DESCRIPTION: &'static str = "Gets the RemoteFX physical graphics adapters on one or more Hyper-V hosts.";
+    const DESCRIPTION: &'static str =
+        "Gets the RemoteFX physical graphics adapters on one or more Hyper-V hosts.";
     type Input = GetVmRemoteFxPhysicalVideoAdapterInput;
     type Output = GetVmRemoteFxPhysicalVideoAdapterOutput;
 
@@ -43,9 +43,14 @@ impl HyperVTool for GetVmRemoteFxPhysicalVideoAdapterTool {
         let mut args = vec!["Get-VMRemoteFXPhysicalVideoAdapter".to_string()];
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, GpuName, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -70,14 +75,15 @@ impl HyperVTool for GetVmRemoteFxPhysicalVideoAdapterTool {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
                 gpu_name: item["GpuName"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmRemoteFxPhysicalVideoAdapterOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(GetVmRemoteFxPhysicalVideoAdapterTool);

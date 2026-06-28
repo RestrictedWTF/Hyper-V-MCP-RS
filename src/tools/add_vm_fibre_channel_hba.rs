@@ -158,7 +158,6 @@ impl HyperVTool for AddVmFibreChannelHbaTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              Name, \

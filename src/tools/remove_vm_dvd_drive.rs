@@ -39,7 +39,9 @@ impl HyperVTool for RemoveVmDvdDriveTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Remove-VMDvdDrive".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(controller_number) = &input.controller_number {
@@ -50,15 +52,19 @@ impl HyperVTool for RemoveVmDvdDriveTool {
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -66,6 +72,5 @@ impl HyperVTool for RemoveVmDvdDriveTool {
         Ok(RemoveVmDvdDriveOutput { success: true })
     }
 }
-
 
 register_tool!(RemoveVmDvdDriveTool);

@@ -14,7 +14,7 @@ pub struct DisableVmIntegrationServiceInput {
     /// Name of the integration service to disable (e.g. "VSS", "Shutdown",
     /// "Time Synchronization", "Heartbeat", "Key-Value Pair Exchange",
     /// "Guest Service Interface").
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -74,7 +74,6 @@ impl HyperVTool for DisableVmIntegrationServiceTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-
 
         let ps = format!(
             "{} | Select-Object VMName, VMId, Name, Enabled, \

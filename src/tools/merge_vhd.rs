@@ -81,7 +81,6 @@ impl HyperVTool for MergeVhdTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object Path, \
              @{{N='VhdFormat';E={{$_.VhdFormat.ToString()}}}}, \

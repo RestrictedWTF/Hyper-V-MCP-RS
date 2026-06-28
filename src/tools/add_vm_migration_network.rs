@@ -69,7 +69,6 @@ impl HyperVTool for AddVmMigrationNetworkTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object Subnet, Priority, ComputerName, IsDeleted | ConvertTo-Json -Compress -Depth 3",
             args.join(" ")

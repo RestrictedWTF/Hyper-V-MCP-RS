@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct StopVmReplicationInput {
     /// Name of the virtual machine whose ongoing resynchronization should be cancelled.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

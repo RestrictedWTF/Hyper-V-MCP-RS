@@ -36,24 +36,38 @@ impl HyperVTool for RemoveVmSwitchTeamMemberTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Remove-VMSwitchTeamMember".to_string()];
         if input.vm_switch.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_switch must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_switch must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-VMSwitch '{}'", escape_ps_string(&input.vm_switch)));
+        args.push(format!(
+            "-VMSwitch '{}'",
+            escape_ps_string(&input.vm_switch)
+        ));
         if input.net_adapter_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("net_adapter_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "net_adapter_name must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-NetAdapterName '{}'", escape_ps_string(&input.net_adapter_name)));
+        args.push(format!(
+            "-NetAdapterName '{}'",
+            escape_ps_string(&input.net_adapter_name)
+        ));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -61,6 +75,5 @@ impl HyperVTool for RemoveVmSwitchTeamMemberTool {
         Ok(RemoveVmSwitchTeamMemberOutput { success: true })
     }
 }
-
 
 register_tool!(RemoveVmSwitchTeamMemberTool);

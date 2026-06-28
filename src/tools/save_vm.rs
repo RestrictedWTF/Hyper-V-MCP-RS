@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SaveVmInput {
     /// Name of the virtual machine to save.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

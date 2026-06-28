@@ -31,15 +31,19 @@ impl HyperVTool for EnableVmEventingTool {
         let mut args = vec!["Enable-VMEventing".to_string()];
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -47,6 +51,5 @@ impl HyperVTool for EnableVmEventingTool {
         Ok(EnableVmEventingOutput { success: true })
     }
 }
-
 
 register_tool!(EnableVmEventingTool);

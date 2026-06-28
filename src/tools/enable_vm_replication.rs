@@ -150,7 +150,6 @@ impl HyperVTool for EnableVmReplicationTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object Name, VMId, \
              @{{N='ReplicationState';E={{$_.ReplicationState.ToString()}}}}, \
@@ -204,7 +203,10 @@ impl HyperVTool for EnableVmReplicationTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                health: replication["Health"].as_str().unwrap_or_default().to_string(),
+                health: replication["Health"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 last_replication_time: replication["LastReplicationTime"]
                     .as_str()
                     .unwrap_or_default()

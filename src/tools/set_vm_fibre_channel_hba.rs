@@ -34,7 +34,7 @@ pub struct SetVmFibreChannelHbaInput {
     #[serde(rename = "vmName")]
     pub vm_name: String,
     /// Name of the Fibre Channel HBA.
-pub name: String,
+    pub name: String,
     /// World-wide node name of address set A.
     #[serde(default, rename = "worldWideNodeNameSetA")]
     pub world_wide_node_name_set_a: Option<String>,
@@ -57,56 +57,85 @@ pub struct SetVmFibreChannelHbaOutput {
     pub adapters: Vec<VmFibreChannelHbaSetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmFibreChannelHbaTool;
 
 #[async_trait]
 impl HyperVTool for SetVmFibreChannelHbaTool {
     const NAME: &'static str = "hyperv_set_vm_fibre_channel_hba";
-    const DESCRIPTION: &'static str = "Configures a Fibre Channel host bus adapter on a virtual machine.";
+    const DESCRIPTION: &'static str =
+        "Configures a Fibre Channel host bus adapter on a virtual machine.";
     type Input = SetVmFibreChannelHbaInput;
     type Output = SetVmFibreChannelHbaOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMFibreChannelHba".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if let Some(world_wide_node_name_set_a) = &input.world_wide_node_name_set_a {
             if world_wide_node_name_set_a.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_node_name_set_a must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_node_name_set_a must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWideNodeNameSetA '{}'", escape_ps_string(world_wide_node_name_set_a)));
+            args.push(format!(
+                "-WorldWideNodeNameSetA '{}'",
+                escape_ps_string(world_wide_node_name_set_a)
+            ));
         }
         if let Some(world_wide_port_name_set_a) = &input.world_wide_port_name_set_a {
             if world_wide_port_name_set_a.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_port_name_set_a must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_port_name_set_a must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWidePortNameSetA '{}'", escape_ps_string(world_wide_port_name_set_a)));
+            args.push(format!(
+                "-WorldWidePortNameSetA '{}'",
+                escape_ps_string(world_wide_port_name_set_a)
+            ));
         }
         if let Some(world_wide_node_name_set_b) = &input.world_wide_node_name_set_b {
             if world_wide_node_name_set_b.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_node_name_set_b must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_node_name_set_b must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWideNodeNameSetB '{}'", escape_ps_string(world_wide_node_name_set_b)));
+            args.push(format!(
+                "-WorldWideNodeNameSetB '{}'",
+                escape_ps_string(world_wide_node_name_set_b)
+            ));
         }
         if let Some(world_wide_port_name_set_b) = &input.world_wide_port_name_set_b {
             if world_wide_port_name_set_b.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_port_name_set_b must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_port_name_set_b must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWidePortNameSetB '{}'", escape_ps_string(world_wide_port_name_set_b)));
+            args.push(format!(
+                "-WorldWidePortNameSetB '{}'",
+                escape_ps_string(world_wide_port_name_set_b)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, SanName, WorldWideNodeNameSetA, WorldWidePortNameSetA, WorldWideNodeNameSetB, WorldWidePortNameSetB, IsTemplate | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -133,18 +162,28 @@ impl HyperVTool for SetVmFibreChannelHbaTool {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
                 san_name: item["SanName"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 is_template: item["IsTemplate"].as_bool().unwrap_or_default(),
             });
         }
 
         Ok(SetVmFibreChannelHbaOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(SetVmFibreChannelHbaTool);

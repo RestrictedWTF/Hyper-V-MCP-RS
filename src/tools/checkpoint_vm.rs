@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct CheckpointVmInput {
     /// Name of the virtual machine to checkpoint.
-pub name: Option<String>,
+    pub name: Option<String>,
     /// Name of the checkpoint. If omitted, Hyper-V generates a name.
     #[serde(default, rename = "snapshotName")]
     pub snapshot_name: Option<String>,

@@ -51,11 +51,7 @@ impl HyperVTool for NewVmReplicationAuthorizationEntryTool {
     type Input = NewVmReplicationAuthorizationEntryInput;
     type Output = NewVmReplicationAuthorizationEntryOutput;
 
-    async fn run(
-        &self,
-        ctx: &ToolContext,
-        input: Self::Input,
-    ) -> Result<Self::Output, ToolError> {
+    async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         if input.allowed_primary_server.trim().is_empty() {
             return Err(ToolError::InvalidInput(
                 "AllowedPrimaryServer must not be empty".to_string(),
@@ -81,7 +77,10 @@ impl HyperVTool for NewVmReplicationAuthorizationEntryTool {
             "-ReplicaStorageLocation '{}'",
             escape_ps_string(&input.replica_storage_location)
         ));
-        args.push(format!("-TrustGroup '{}'", escape_ps_string(&input.trust_group)));
+        args.push(format!(
+            "-TrustGroup '{}'",
+            escape_ps_string(&input.trust_group)
+        ));
 
         if let Some(computer) = &input.computer_name {
             if computer.trim().is_empty() {
@@ -122,10 +121,7 @@ impl HyperVTool for NewVmReplicationAuthorizationEntryTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                trust_group: entry["TrustGroup"]
-                    .as_str()
-                    .unwrap_or_default()
-                    .to_string(),
+                trust_group: entry["TrustGroup"].as_str().unwrap_or_default().to_string(),
             });
         }
 

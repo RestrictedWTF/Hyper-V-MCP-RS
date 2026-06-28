@@ -36,26 +36,37 @@ impl HyperVTool for RemoveVmSwitchExtensionSwitchFeatureTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Remove-VMSwitchExtensionSwitchFeature".to_string()];
         if input.feature_id.trim().is_empty() {
-            return Err(ToolError::InvalidInput("feature_id must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "feature_id must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-FeatureId '{}'", escape_ps_string(&input.feature_id)));
+        args.push(format!(
+            "-FeatureId '{}'",
+            escape_ps_string(&input.feature_id)
+        ));
         if let Some(vm_switch) = &input.vm_switch {
             if vm_switch.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_switch must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_switch must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMSwitch '{}'", escape_ps_string(vm_switch)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -63,6 +74,5 @@ impl HyperVTool for RemoveVmSwitchExtensionSwitchFeatureTool {
         Ok(RemoveVmSwitchExtensionSwitchFeatureOutput { success: true })
     }
 }
-
 
 register_tool!(RemoveVmSwitchExtensionSwitchFeatureTool);

@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ResetVmReplicationStatisticsInput {
     /// Name of the virtual machine whose replication statistics are to be reset.
-pub name: Option<String>,
+    pub name: Option<String>,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -100,9 +100,7 @@ impl HyperVTool for ResetVmReplicationStatisticsTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                replica_server_port: item["ReplicaServerPort"]
-                    .as_i64()
-                    .unwrap_or_default() as i32,
+                replica_server_port: item["ReplicaServerPort"].as_i64().unwrap_or_default() as i32,
                 authentication_type: item["AuthenticationType"]
                     .as_str()
                     .unwrap_or_default()

@@ -45,7 +45,6 @@ pub struct SetVmSecurityOutput {
     pub security: Vec<VmSecuritySetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmSecurityTool;
 
@@ -59,7 +58,9 @@ impl HyperVTool for SetVmSecurityTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMSecurity".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(tpm_enabled) = input.tpm_enabled {
@@ -73,9 +74,14 @@ impl HyperVTool for SetVmSecurityTool {
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object VMName, VMId, TpmEnabled, KsdEnabled, Shielded, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -102,14 +108,15 @@ impl HyperVTool for SetVmSecurityTool {
                 tpm_enabled: item["TpmEnabled"].as_bool().unwrap_or_default(),
                 ksd_enabled: item["KsdEnabled"].as_bool().unwrap_or_default(),
                 shielded: item["Shielded"].as_bool().unwrap_or_default(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmSecurityOutput { security: output })
-
     }
 }
-
 
 register_tool!(SetVmSecurityTool);

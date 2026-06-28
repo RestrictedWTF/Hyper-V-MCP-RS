@@ -21,7 +21,7 @@ pub struct VmResourcePoolRenameInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RenameVmResourcePoolInput {
     /// Current name of the resource pool.
-pub name: String,
+    pub name: String,
     /// Type of the resource pool.
     #[serde(rename = "resourcePoolType")]
     pub resource_pool_type: String,
@@ -38,7 +38,6 @@ pub struct RenameVmResourcePoolOutput {
     pub pools: Vec<VmResourcePoolRenameInfo>,
 }
 
-
 #[derive(Default)]
 pub struct RenameVmResourcePoolTool;
 
@@ -52,22 +51,36 @@ impl HyperVTool for RenameVmResourcePoolTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Rename-VMResourcePool".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if input.resource_pool_type.trim().is_empty() {
-            return Err(ToolError::InvalidInput("resource_pool_type must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "resource_pool_type must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-ResourcePoolType '{}'", escape_ps_string(&input.resource_pool_type)));
+        args.push(format!(
+            "-ResourcePoolType '{}'",
+            escape_ps_string(&input.resource_pool_type)
+        ));
         if input.new_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("new_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "new_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-NewName '{}'", escape_ps_string(&input.new_name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, ResourcePoolType, ParentName, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -91,16 +104,20 @@ impl HyperVTool for RenameVmResourcePoolTool {
             output.push(VmResourcePoolRenameInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                resource_pool_type: item["ResourcePoolType"].as_str().unwrap_or_default().to_string(),
+                resource_pool_type: item["ResourcePoolType"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 parent_name: item["ParentName"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(RenameVmResourcePoolOutput { pools: output })
-
     }
 }
-
 
 register_tool!(RenameVmResourcePoolTool);

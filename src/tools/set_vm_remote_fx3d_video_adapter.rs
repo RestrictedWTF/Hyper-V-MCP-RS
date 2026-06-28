@@ -41,21 +41,23 @@ pub struct SetVmRemoteFx3dVideoAdapterOutput {
     pub adapters: Vec<VmRemoteFx3dVideoAdapterSetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmRemoteFx3dVideoAdapterTool;
 
 #[async_trait]
 impl HyperVTool for SetVmRemoteFx3dVideoAdapterTool {
     const NAME: &'static str = "hyperv_set_vm_remote_fx3d_video_adapter";
-    const DESCRIPTION: &'static str = "Configures the RemoteFX 3D video adapter of a virtual machine.";
+    const DESCRIPTION: &'static str =
+        "Configures the RemoteFX 3D video adapter of a virtual machine.";
     type Input = SetVmRemoteFx3dVideoAdapterInput;
     type Output = SetVmRemoteFx3dVideoAdapterOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMRemoteFx3dVideoAdapter".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(monitor_count) = &input.monitor_count {
@@ -63,15 +65,25 @@ impl HyperVTool for SetVmRemoteFx3dVideoAdapterTool {
         }
         if let Some(maximum_resolution) = &input.maximum_resolution {
             if maximum_resolution.trim().is_empty() {
-                return Err(ToolError::InvalidInput("maximum_resolution must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "maximum_resolution must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-MaximumResolution '{}'", escape_ps_string(maximum_resolution)));
+            args.push(format!(
+                "-MaximumResolution '{}'",
+                escape_ps_string(maximum_resolution)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, MonitorCount, MaximumResolution | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -98,14 +110,15 @@ impl HyperVTool for SetVmRemoteFx3dVideoAdapterTool {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
                 monitor_count: item["MonitorCount"].as_u64().unwrap_or_default() as u32,
-                maximum_resolution: item["MaximumResolution"].as_str().unwrap_or_default().to_string(),
+                maximum_resolution: item["MaximumResolution"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmRemoteFx3dVideoAdapterOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(SetVmRemoteFx3dVideoAdapterTool);

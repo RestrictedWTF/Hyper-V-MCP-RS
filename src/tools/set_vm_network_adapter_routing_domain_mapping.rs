@@ -195,7 +195,6 @@ impl HyperVTool for SetVmNetworkAdapterRoutingDomainMappingTool {
             args.push(format!("-IsolationName {}", names));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              @{{N='RoutingDomainID';E={{$_.RoutingDomainID.ToString()}}}}, \

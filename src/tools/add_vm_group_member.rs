@@ -153,7 +153,11 @@ impl HyperVTool for AddVmGroupMemberTool {
                 .map_err(|e| ToolError::Sidecar(e.to_string()))?;
         }
 
-        let json_sanitized = if last_json.trim().is_empty() { "[]" } else { &last_json };
+        let json_sanitized = if last_json.trim().is_empty() {
+            "[]"
+        } else {
+            &last_json
+        };
         let raw: serde_json::Value = serde_json::from_str(json_sanitized)?;
 
         let group = parse_vm_group(&raw)?;

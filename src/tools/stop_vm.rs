@@ -22,7 +22,7 @@ pub enum StopVmAction {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct StopVmInput {
     /// Name of the virtual machine to stop.
-pub name: String,
+    pub name: String,
     /// Stop action: "shutdown" (default), "save", or "turnoff".
     #[serde(default)]
     pub action: StopVmAction,

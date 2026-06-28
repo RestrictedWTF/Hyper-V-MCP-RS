@@ -36,14 +36,14 @@ pub struct GetVmIntegrationServiceOutput {
     pub services: Vec<VmIntegrationServiceInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmIntegrationServiceTool;
 
 #[async_trait]
 impl HyperVTool for GetVmIntegrationServiceTool {
     const NAME: &'static str = "hyperv_get_vm_integration_service";
-    const DESCRIPTION: &'static str = "Gets the integration services of a virtual machine or snapshot.";
+    const DESCRIPTION: &'static str =
+        "Gets the integration services of a virtual machine or snapshot.";
     type Input = GetVmIntegrationServiceInput;
     type Output = GetVmIntegrationServiceOutput;
 
@@ -51,15 +51,22 @@ impl HyperVTool for GetVmIntegrationServiceTool {
         let mut args = vec!["Get-VMIntegrationService".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, VMName, VMId, Enabled, @{{N='PrimaryStatus';E={{$_.PrimaryStatus.ToString()}}}}, @{{N='PrimaryStatusDescription';E={{$_.PrimaryStatusDescription.ToString()}}}} | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -85,15 +92,19 @@ impl HyperVTool for GetVmIntegrationServiceTool {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
                 enabled: item["Enabled"].as_bool().unwrap_or_default(),
-                primary_status: item["PrimaryStatus"].as_str().unwrap_or_default().to_string(),
-                primary_status_description: item["PrimaryStatusDescription"].as_str().unwrap_or_default().to_string(),
+                primary_status: item["PrimaryStatus"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                primary_status_description: item["PrimaryStatusDescription"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmIntegrationServiceOutput { services: output })
-
     }
 }
-
 
 register_tool!(GetVmIntegrationServiceTool);

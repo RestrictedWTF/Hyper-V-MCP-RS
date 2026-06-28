@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct DisableVmConsoleSupportInput {
     /// Name of the generation 2 virtual machine whose console support is to be disabled.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

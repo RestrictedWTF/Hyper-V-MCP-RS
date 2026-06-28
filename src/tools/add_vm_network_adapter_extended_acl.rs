@@ -184,7 +184,6 @@ impl HyperVTool for AddVmNetworkAdapterExtendedAclTool {
             }
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              @{{N='Action';E={{$_.Action.ToString()}}}}, \

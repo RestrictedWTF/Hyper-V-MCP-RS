@@ -131,19 +131,13 @@ impl HyperVTool for SetVmReplicationTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
         if let Some(server) = &input.replica_server_name {
-            args.push(format!(
-                "-ReplicaServerName '{}'",
-                escape_ps_string(server)
-            ));
+            args.push(format!("-ReplicaServerName '{}'", escape_ps_string(server)));
         }
         if let Some(port) = input.replica_server_port {
             args.push(format!("-ReplicaServerPort {}", port));
         }
         if let Some(auth) = &input.authentication_type {
-            args.push(format!(
-                "-AuthenticationType '{}'",
-                escape_ps_string(auth)
-            ));
+            args.push(format!("-AuthenticationType '{}'", escape_ps_string(auth)));
         }
         if let Some(thumbprint) = &input.certificate_thumbprint {
             args.push(format!(
@@ -222,7 +216,6 @@ impl HyperVTool for SetVmReplicationTool {
             args.push("-UseBackup".to_string());
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              VMName, ComputerName, \
@@ -276,9 +269,7 @@ impl HyperVTool for SetVmReplicationTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                replica_server_port: item["ReplicaServerPort"]
-                    .as_u64()
-                    .unwrap_or_default() as u32,
+                replica_server_port: item["ReplicaServerPort"].as_u64().unwrap_or_default() as u32,
                 last_replication_time: item["LastReplicationTime"]
                     .as_str()
                     .unwrap_or_default()
@@ -290,7 +281,9 @@ impl HyperVTool for SetVmReplicationTool {
             });
         }
 
-        Ok(SetVmReplicationOutput { replication: output })
+        Ok(SetVmReplicationOutput {
+            replication: output,
+        })
     }
 }
 

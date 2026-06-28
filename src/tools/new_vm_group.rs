@@ -29,7 +29,7 @@ pub struct VmGroupMemberInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct NewVmGroupInput {
     /// Name of the virtual machine group.
-pub name: String,
+    pub name: String,
     /// Type of the group (VMCollectionType or ManagementCollectionType).
     #[serde(rename = "groupType")]
     pub group_type: String,
@@ -42,7 +42,6 @@ pub name: String,
 pub struct NewVmGroupOutput {
     pub group: VmGroupNewInfo,
 }
-
 
 #[derive(Default)]
 pub struct NewVmGroupTool;
@@ -57,18 +56,30 @@ impl HyperVTool for NewVmGroupTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["New-VMGroup".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if input.group_type.trim().is_empty() {
-            return Err(ToolError::InvalidInput("group_type must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "group_type must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-GroupType '{}'", escape_ps_string(&input.group_type)));
+        args.push(format!(
+            "-GroupType '{}'",
+            escape_ps_string(&input.group_type)
+        ));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         args.push("-PassThru".to_string());
@@ -85,10 +96,8 @@ impl HyperVTool for NewVmGroupTool {
 
         let group = parse_new_vm_group_info(&raw)?;
         Ok(NewVmGroupOutput { group })
-
     }
 }
-
 
 fn parse_new_member_array(value: &serde_json::Value) -> Vec<VmGroupMemberInfo> {
     match value {
@@ -124,7 +133,10 @@ fn build_new_group_info(value: &serde_json::Value) -> VmGroupNewInfo {
         group_type: value["GroupType"].as_str().unwrap_or_default().to_string(),
         vm_members: parse_new_member_array(&value["VMMembers"]),
         vm_group_members: parse_new_member_array(&value["VMGroupMembers"]),
-        computer_name: value["ComputerName"].as_str().unwrap_or_default().to_string(),
+        computer_name: value["ComputerName"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
     }
 }
 

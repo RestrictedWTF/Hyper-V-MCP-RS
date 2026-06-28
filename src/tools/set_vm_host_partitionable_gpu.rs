@@ -77,7 +77,6 @@ impl HyperVTool for SetVmHostPartitionableGpuTool {
             args.push(format!("-PartitionCount {}", count));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              Name, InstancePath, PartitionCount, TotalPartitionCount, ValidPartitionCounts | \

@@ -157,9 +157,7 @@ impl HyperVTool for MeasureVmReplicationTool {
                 average_replication_size: entry["AverageReplicationSize"]
                     .as_u64()
                     .unwrap_or_default(),
-                last_replication_size: entry["LastReplicationSize"]
-                    .as_u64()
-                    .unwrap_or_default(),
+                last_replication_size: entry["LastReplicationSize"].as_u64().unwrap_or_default(),
                 maximum_replication_size: entry["MaximumReplicationSize"]
                     .as_u64()
                     .unwrap_or_default(),

@@ -39,7 +39,6 @@ pub struct SetVmNetworkAdapterFailoverConfigurationOutput {
     pub configs: Vec<VmNetworkAdapterFailoverConfigSetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmNetworkAdapterFailoverConfigurationTool;
 
@@ -53,22 +52,38 @@ impl HyperVTool for SetVmNetworkAdapterFailoverConfigurationTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMNetworkAdapterFailoverConfiguration".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if input.network_adapter_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("network_adapter_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "network_adapter_name must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-NetworkAdapterName '{}'", escape_ps_string(&input.network_adapter_name)));
+        args.push(format!(
+            "-NetworkAdapterName '{}'",
+            escape_ps_string(&input.network_adapter_name)
+        ));
         if !input.ip_addresses.is_empty() {
-            let escaped: Vec<String> = input.ip_addresses.iter().map(|ip| format!("'{}'", escape_ps_string(ip))).collect();
+            let escaped: Vec<String> = input
+                .ip_addresses
+                .iter()
+                .map(|ip| format!("'{}'", escape_ps_string(ip)))
+                .collect();
             args.push(format!("-IPAddress @({})", escaped.join(",")));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object VMName, NetworkAdapterName, IPAddresses, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -90,21 +105,28 @@ impl HyperVTool for SetVmNetworkAdapterFailoverConfigurationTool {
         let mut output = Vec::with_capacity(items.len());
         for item in items {
             let ip_addresses = match &item["IPAddresses"] {
-                serde_json::Value::Array(arr) => arr.iter().map(|v| v.as_str().unwrap_or_default().to_string()).collect(),
+                serde_json::Value::Array(arr) => arr
+                    .iter()
+                    .map(|v| v.as_str().unwrap_or_default().to_string())
+                    .collect(),
                 _ => Vec::new(),
             };
             output.push(VmNetworkAdapterFailoverConfigSetInfo {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
-                network_adapter_name: item["NetworkAdapterName"].as_str().unwrap_or_default().to_string(),
+                network_adapter_name: item["NetworkAdapterName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 ip_addresses,
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmNetworkAdapterFailoverConfigurationOutput { configs: output })
-
     }
 }
-
 
 register_tool!(SetVmNetworkAdapterFailoverConfigurationTool);

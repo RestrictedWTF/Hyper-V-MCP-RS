@@ -31,7 +31,6 @@ pub struct GetVmStoragePathOutput {
     pub paths: Vec<VmStoragePathInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmStoragePathTool;
 
@@ -46,15 +45,22 @@ impl HyperVTool for GetVmStoragePathTool {
         let mut args = vec!["Get-VMStoragePath".to_string()];
         if let Some(name) = &input.name {
             if name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Name '{}'", escape_ps_string(name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Path, PoolName, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -79,14 +85,15 @@ impl HyperVTool for GetVmStoragePathTool {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 path: item["Path"].as_str().unwrap_or_default().to_string(),
                 pool_name: item["PoolName"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmStoragePathOutput { paths: output })
-
     }
 }
-
 
 register_tool!(GetVmStoragePathTool);

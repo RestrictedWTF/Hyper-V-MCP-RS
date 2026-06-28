@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct CopyVmFileInput {
     /// Name of the virtual machine to copy the file to.
-pub name: String,
+    pub name: String,
     /// Path to the source file on the Hyper-V host.
     #[serde(rename = "sourcePath")]
     pub source_path: String,
@@ -39,7 +39,7 @@ pub struct CopyVmFileOutput {
     /// True if the file was copied successfully.
     pub success: bool,
     /// Name of the virtual machine that received the file.
-pub name: String,
+    pub name: String,
     /// Destination path inside the virtual machine.
     #[serde(rename = "destinationPath")]
     pub destination_path: String,

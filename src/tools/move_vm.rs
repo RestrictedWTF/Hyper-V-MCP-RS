@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct MoveVmInput {
     /// Name of the virtual machine to move.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to which the virtual machine is to be moved.
     #[serde(rename = "destinationHost")]
     pub destination_host: String,
@@ -114,10 +114,7 @@ impl HyperVTool for MoveVmTool {
                     "virtualMachinePath must not be empty".to_string(),
                 ));
             }
-            args.push(format!(
-                "-VirtualMachinePath '{}'",
-                escape_ps_string(path)
-            ));
+            args.push(format!("-VirtualMachinePath '{}'", escape_ps_string(path)));
         }
         if let Some(path) = &input.snapshot_file_path {
             if path.trim().is_empty() {
@@ -125,10 +122,7 @@ impl HyperVTool for MoveVmTool {
                     "snapshotFilePath must not be empty".to_string(),
                 ));
             }
-            args.push(format!(
-                "-SnapshotFilePath '{}'",
-                escape_ps_string(path)
-            ));
+            args.push(format!("-SnapshotFilePath '{}'", escape_ps_string(path)));
         }
         if let Some(path) = &input.smart_paging_file_path {
             if path.trim().is_empty() {
@@ -136,10 +130,7 @@ impl HyperVTool for MoveVmTool {
                     "smartPagingFilePath must not be empty".to_string(),
                 ));
             }
-            args.push(format!(
-                "-SmartPagingFilePath '{}'",
-                escape_ps_string(path)
-            ));
+            args.push(format!("-SmartPagingFilePath '{}'", escape_ps_string(path)));
         }
         if let Some(pool) = &input.resource_pool_name {
             if pool.trim().is_empty() {
@@ -147,10 +138,7 @@ impl HyperVTool for MoveVmTool {
                     "resourcePoolName must not be empty".to_string(),
                 ));
             }
-            args.push(format!(
-                "-ResourcePoolName '{}'",
-                escape_ps_string(pool)
-            ));
+            args.push(format!("-ResourcePoolName '{}'", escape_ps_string(pool)));
         }
         if input.retain_vhd_copies_on_source {
             args.push("-RetainVhdCopiesOnSource".to_string());

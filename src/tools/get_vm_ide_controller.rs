@@ -33,7 +33,6 @@ pub struct GetVmIdeControllerOutput {
     pub controllers: Vec<VmIdeControllerInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmIdeControllerTool;
 
@@ -48,15 +47,22 @@ impl HyperVTool for GetVmIdeControllerTool {
         let mut args = vec!["Get-VMIdeController".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, ControllerNumber | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -86,10 +92,10 @@ impl HyperVTool for GetVmIdeControllerTool {
             });
         }
 
-        Ok(GetVmIdeControllerOutput { controllers: output })
-
+        Ok(GetVmIdeControllerOutput {
+            controllers: output,
+        })
     }
 }
-
 
 register_tool!(GetVmIdeControllerTool);

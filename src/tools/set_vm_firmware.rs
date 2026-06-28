@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmFirmwareInput {
     /// Name of the virtual machine whose firmware configuration is to be set.
-pub name: String,
+    pub name: String,
     /// Hyper-V host on which the virtual machine resides. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -84,7 +84,6 @@ impl HyperVTool for SetVmFirmwareTool {
         if let Some(allow) = input.allow_legacy_network_adapter {
             args.push(format!("-AllowLegacyNetworkAdapter ${}", allow));
         }
-
 
         let ps = format!(
             "{} | Select-Object VMName, \

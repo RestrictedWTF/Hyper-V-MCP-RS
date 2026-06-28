@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmSwitchInput {
     /// Name of the virtual switch to configure.
-pub name: String,
+    pub name: String,
     /// Hyper-V host on which the virtual switch resides. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

@@ -30,8 +30,7 @@ pub struct DisableVmMigrationTool;
 #[async_trait]
 impl HyperVTool for DisableVmMigrationTool {
     const NAME: &'static str = "hyperv_disable_vm_migration";
-    const DESCRIPTION: &'static str =
-        "Disables migration on one or more virtual machine hosts.";
+    const DESCRIPTION: &'static str = "Disables migration on one or more virtual machine hosts.";
     type Input = DisableVmMigrationInput;
     type Output = DisableVmMigrationOutput;
 

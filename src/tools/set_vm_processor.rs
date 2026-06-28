@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmProcessorInput {
     /// Name of the virtual machine whose processors are to be configured.
-pub name: String,
+    pub name: String,
     /// Hyper-V host on which the virtual machine resides. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -146,7 +146,6 @@ impl HyperVTool for SetVmProcessorTool {
         if let Some(enabled) = input.expose_virtualization_extensions {
             args.push(format!("-ExposeVirtualizationExtensions ${}", enabled));
         }
-
 
         let ps = format!(
             "{} | Select-Object \

@@ -41,7 +41,6 @@ pub struct SetVmSecurityPolicyOutput {
     pub policies: Vec<VmSecurityPolicySetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmSecurityPolicyTool;
 
@@ -55,26 +54,43 @@ impl HyperVTool for SetVmSecurityPolicyTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMSecurityPolicy".to_string()];
         if input.vm_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-VMName '{}'", escape_ps_string(&input.vm_name)));
         if let Some(encryption_type) = &input.encryption_type {
             if encryption_type.trim().is_empty() {
-                return Err(ToolError::InvalidInput("encryption_type must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "encryption_type must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-EncryptionType '{}'", escape_ps_string(encryption_type)));
+            args.push(format!(
+                "-EncryptionType '{}'",
+                escape_ps_string(encryption_type)
+            ));
         }
         if let Some(shielding_data_file_path) = &input.shielding_data_file_path {
             if shielding_data_file_path.trim().is_empty() {
-                return Err(ToolError::InvalidInput("shielding_data_file_path must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "shielding_data_file_path must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ShieldingDataFilePath '{}'", escape_ps_string(shielding_data_file_path)));
+            args.push(format!(
+                "-ShieldingDataFilePath '{}'",
+                escape_ps_string(shielding_data_file_path)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object VMName, VMId, EncryptionType, ShieldingDataFilePath, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -98,16 +114,23 @@ impl HyperVTool for SetVmSecurityPolicyTool {
             output.push(VmSecurityPolicySetInfo {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
-                encryption_type: item["EncryptionType"].as_str().unwrap_or_default().to_string(),
-                shielding_data_file_path: item["ShieldingDataFilePath"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                encryption_type: item["EncryptionType"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                shielding_data_file_path: item["ShieldingDataFilePath"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmSecurityPolicyOutput { policies: output })
-
     }
 }
-
 
 register_tool!(SetVmSecurityPolicyTool);

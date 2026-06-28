@@ -47,7 +47,12 @@ impl HyperVTool for DisableVmResourceMeteringTool {
     type Output = DisableVmResourceMeteringOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
-        if input.name.as_ref().map(|s| s.trim()).unwrap_or("").is_empty()
+        if input
+            .name
+            .as_ref()
+            .map(|s| s.trim())
+            .unwrap_or("")
+            .is_empty()
             && input
                 .resource_pool_name
                 .as_ref()

@@ -36,14 +36,14 @@ pub struct GetVmResourcePoolOutput {
     pub pools: Vec<VmResourcePoolInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmResourcePoolTool;
 
 #[async_trait]
 impl HyperVTool for GetVmResourcePoolTool {
     const NAME: &'static str = "hyperv_get_vm_resource_pool";
-    const DESCRIPTION: &'static str = "Gets the resource pools on one or more virtual machine hosts.";
+    const DESCRIPTION: &'static str =
+        "Gets the resource pools on one or more virtual machine hosts.";
     type Input = GetVmResourcePoolInput;
     type Output = GetVmResourcePoolOutput;
 
@@ -51,21 +51,33 @@ impl HyperVTool for GetVmResourcePoolTool {
         let mut args = vec!["Get-VMResourcePool".to_string()];
         if let Some(name) = &input.name {
             if name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Name '{}'", escape_ps_string(name)));
         }
         if let Some(resource_pool_type) = &input.resource_pool_type {
             if resource_pool_type.trim().is_empty() {
-                return Err(ToolError::InvalidInput("resource_pool_type must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "resource_pool_type must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ResourcePoolType '{}'", escape_ps_string(resource_pool_type)));
+            args.push(format!(
+                "-ResourcePoolType '{}'",
+                escape_ps_string(resource_pool_type)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='ResourcePoolType';E={{$_.ResourcePoolType.ToString()}}}}, ParentName, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -89,16 +101,20 @@ impl HyperVTool for GetVmResourcePoolTool {
             output.push(VmResourcePoolInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                resource_pool_type: item["ResourcePoolType"].as_str().unwrap_or_default().to_string(),
+                resource_pool_type: item["ResourcePoolType"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 parent_name: item["ParentName"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmResourcePoolOutput { pools: output })
-
     }
 }
-
 
 register_tool!(GetVmResourcePoolTool);

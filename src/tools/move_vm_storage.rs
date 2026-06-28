@@ -117,10 +117,7 @@ impl HyperVTool for MoveVmStorageTool {
             args.push(format!("-SnapshotFilePath '{}'", escape_ps_string(path)));
         }
         if let Some(path) = &input.virtual_hard_disk_path {
-            args.push(format!(
-                "-VirtualHardDiskPath '{}'",
-                escape_ps_string(path)
-            ));
+            args.push(format!("-VirtualHardDiskPath '{}'", escape_ps_string(path)));
         }
         if let Some(computer) = &input.computer_name {
             if computer.trim().is_empty() {
@@ -130,7 +127,6 @@ impl HyperVTool for MoveVmStorageTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-
 
         let ps = format!(
             "{} | Select-Object Name, Id, \

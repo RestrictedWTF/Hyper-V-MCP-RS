@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RenameVmSwitchInput {
     /// Name of the virtual switch to rename.
-pub name: String,
+    pub name: String,
     /// New name for the virtual switch.
     #[serde(rename = "newName")]
     pub new_name: String,

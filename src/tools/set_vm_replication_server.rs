@@ -159,7 +159,10 @@ impl HyperVTool for SetVmReplicationServerTool {
                     "MonitoringInterval must not be empty when provided".to_string(),
                 ));
             }
-            args.push(format!("-MonitoringInterval '{}'", escape_ps_string(interval)));
+            args.push(format!(
+                "-MonitoringInterval '{}'",
+                escape_ps_string(interval)
+            ));
         }
         if let Some(start) = &input.monitoring_start_time {
             if start.trim().is_empty() {
@@ -175,7 +178,6 @@ impl HyperVTool for SetVmReplicationServerTool {
         if input.force == Some(true) {
             args.push("-Force".to_string());
         }
-
 
         let ps = format!(
             "{} | Select-Object \
@@ -210,9 +212,7 @@ impl HyperVTool for SetVmReplicationServerTool {
                     .as_str()
                     .unwrap_or_default()
                     .to_string(),
-                replication_enabled: server["ReplicationEnabled"]
-                    .as_bool()
-                    .unwrap_or_default(),
+                replication_enabled: server["ReplicationEnabled"].as_bool().unwrap_or_default(),
                 allowed_authentication_type: server["AllowedAuthenticationType"]
                     .as_str()
                     .unwrap_or_default()

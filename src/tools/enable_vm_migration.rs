@@ -31,8 +31,7 @@ pub struct EnableVmMigrationTool;
 #[async_trait]
 impl HyperVTool for EnableVmMigrationTool {
     const NAME: &'static str = "hyperv_enable_vm_migration";
-    const DESCRIPTION: &'static str =
-        "Enables migration on one or more virtual machine hosts.";
+    const DESCRIPTION: &'static str = "Enables migration on one or more virtual machine hosts.";
     type Input = EnableVmMigrationInput;
     type Output = EnableVmMigrationOutput;
 

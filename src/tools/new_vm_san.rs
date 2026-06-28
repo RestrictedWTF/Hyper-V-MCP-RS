@@ -25,7 +25,7 @@ pub struct VmSanNewInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct NewVmSanInput {
     /// Name of the virtual SAN.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -36,28 +36,35 @@ pub struct NewVmSanOutput {
     pub sans: Vec<VmSanNewInfo>,
 }
 
-
 #[derive(Default)]
 pub struct NewVmSanTool;
 
 #[async_trait]
 impl HyperVTool for NewVmSanTool {
     const NAME: &'static str = "hyperv_new_vm_san";
-    const DESCRIPTION: &'static str = "Creates a new virtual storage area network (SAN) on a Hyper-V host.";
+    const DESCRIPTION: &'static str =
+        "Creates a new virtual storage area network (SAN) on a Hyper-V host.";
     type Input = NewVmSanInput;
     type Output = NewVmSanOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["New-VMSan".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         args.push("-PassThru".to_string());
@@ -82,18 +89,31 @@ impl HyperVTool for NewVmSanTool {
             output.push(VmSanNewInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(NewVmSanOutput { sans: output })
-
     }
 }
-
 
 register_tool!(NewVmSanTool);

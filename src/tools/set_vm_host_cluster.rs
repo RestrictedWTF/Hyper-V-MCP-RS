@@ -54,7 +54,6 @@ impl HyperVTool for SetVmHostClusterTool {
             args.push(format!("-SharedStoragePath '{}'", escape_ps_string(path)));
         }
 
-
         let ps = format!(
             "{} | Select-Object ClusterName, SharedStoragePath, Path | ConvertTo-Json -Compress -Depth 3",
             args.join(" ")

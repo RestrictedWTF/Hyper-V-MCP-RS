@@ -12,7 +12,7 @@ pub struct DisableVmSwitchExtensionInput {
     #[serde(rename = "vmSwitchName")]
     pub vm_switch_name: String,
     /// Name of the switch extension to disable.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -75,7 +75,6 @@ impl HyperVTool for DisableVmSwitchExtensionTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-
 
         let ps = format!(
             "{} | Select-Object \

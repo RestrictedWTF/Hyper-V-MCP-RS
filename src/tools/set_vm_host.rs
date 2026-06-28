@@ -171,7 +171,6 @@ impl HyperVTool for SetVmHostTool {
             args.push(format!("-EnableEnhancedSessionMode ${}", enabled));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              ComputerName, FullyQualifiedDomainName, Name, LogicalProcessorCount, \

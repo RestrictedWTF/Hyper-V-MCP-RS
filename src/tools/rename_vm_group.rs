@@ -29,7 +29,7 @@ pub struct VmGroupMemberInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RenameVmGroupInput {
     /// Current name of the virtual machine group.
-pub name: String,
+    pub name: String,
     /// New name for the group.
     #[serde(rename = "newName")]
     pub new_name: String,
@@ -42,7 +42,6 @@ pub name: String,
 pub struct RenameVmGroupOutput {
     pub group: VmGroupRenameInfo,
 }
-
 
 #[derive(Default)]
 pub struct RenameVmGroupTool;
@@ -57,18 +56,27 @@ impl HyperVTool for RenameVmGroupTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Rename-VMGroup".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if input.new_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("new_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "new_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-NewName '{}'", escape_ps_string(&input.new_name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='GroupType';E={{$_.GroupType.ToString()}}}}, VMMembers, VMGroupMembers, ComputerName | ConvertTo-Json -Compress -Depth 10", args.join(" "));
@@ -84,10 +92,8 @@ impl HyperVTool for RenameVmGroupTool {
 
         let group = parse_vm_group_rename_info(&raw)?;
         Ok(RenameVmGroupOutput { group })
-
     }
 }
-
 
 fn parse_rename_member_array(value: &serde_json::Value) -> Vec<VmGroupMemberInfo> {
     match value {
@@ -123,7 +129,10 @@ fn build_rename_group_info(value: &serde_json::Value) -> VmGroupRenameInfo {
         group_type: value["GroupType"].as_str().unwrap_or_default().to_string(),
         vm_members: parse_rename_member_array(&value["VMMembers"]),
         vm_group_members: parse_rename_member_array(&value["VMGroupMembers"]),
-        computer_name: value["ComputerName"].as_str().unwrap_or_default().to_string(),
+        computer_name: value["ComputerName"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
     }
 }
 

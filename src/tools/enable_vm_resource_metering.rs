@@ -34,14 +34,14 @@ pub struct EnableVmResourceMeteringOutput {
     pub vms: Vec<EnableVmResourceMeteringInfo>,
 }
 
-
 #[derive(Default)]
 pub struct EnableVmResourceMeteringTool;
 
 #[async_trait]
 impl HyperVTool for EnableVmResourceMeteringTool {
     const NAME: &'static str = "hyperv_enable_vm_resource_metering";
-    const DESCRIPTION: &'static str = "Collects resource utilization data for a virtual machine or resource pool.";
+    const DESCRIPTION: &'static str =
+        "Collects resource utilization data for a virtual machine or resource pool.";
     type Input = EnableVmResourceMeteringInput;
     type Output = EnableVmResourceMeteringOutput;
 
@@ -49,21 +49,33 @@ impl HyperVTool for EnableVmResourceMeteringTool {
         let mut args = vec!["Enable-VMResourceMetering".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(resource_pool_name) = &input.resource_pool_name {
             if resource_pool_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("resource_pool_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "resource_pool_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ResourcePoolName '{}'", escape_ps_string(resource_pool_name)));
+            args.push(format!(
+                "-ResourcePoolName '{}'",
+                escape_ps_string(resource_pool_name)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='State';E={{$_.State.ToString()}}}}, @{{N='Uptime';E={{$_.Uptime.ToString()}}}}, ProcessorCount, MemoryAssigned | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -93,7 +105,6 @@ impl HyperVTool for EnableVmResourceMeteringTool {
                 memory_assigned: vm["MemoryAssigned"].as_u64().unwrap_or_default(),
             });
         }
-
 
         Ok(EnableVmResourceMeteringOutput { vms: output })
     }

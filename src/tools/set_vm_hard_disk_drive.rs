@@ -131,7 +131,6 @@ impl HyperVTool for SetVmHardDiskDriveTool {
             args.push("-AllowUnverifiedPaths".to_string());
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              Name, \

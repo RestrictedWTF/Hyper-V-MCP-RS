@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmInput {
     /// Name of the virtual machine to configure.
-pub name: String,
+    pub name: String,
     /// Hyper-V host on which the virtual machine resides. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

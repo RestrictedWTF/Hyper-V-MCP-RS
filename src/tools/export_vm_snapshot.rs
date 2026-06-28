@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ExportVmSnapshotInput {
     /// Name of the checkpoint to export.
-pub name: String,
+    pub name: String,
     /// Name of the virtual machine that owns the checkpoint. Required if the checkpoint name is not unique across VMs.
     #[serde(default, rename = "vmName")]
     pub vm_name: Option<String>,

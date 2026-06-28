@@ -37,8 +37,7 @@ pub struct EnableVmConsoleSupportTool;
 #[async_trait]
 impl HyperVTool for EnableVmConsoleSupportTool {
     const NAME: &'static str = "hyperv_enable_vm_console_support";
-    const DESCRIPTION: &'static str =
-        "Enables keyboard, video, and mouse for virtual machines.";
+    const DESCRIPTION: &'static str = "Enables keyboard, video, and mouse for virtual machines.";
     type Input = EnableVmConsoleSupportInput;
     type Output = EnableVmConsoleSupportOutput;
 
@@ -62,7 +61,6 @@ impl HyperVTool for EnableVmConsoleSupportTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-
 
         let ps = format!(
             "{} | Select-Object Name, Id, \

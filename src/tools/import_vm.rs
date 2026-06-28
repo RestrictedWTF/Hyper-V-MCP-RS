@@ -34,7 +34,6 @@ pub struct ImportVmOutput {
     pub vms: Vec<ImportVmInfo>,
 }
 
-
 #[derive(Default)]
 pub struct ImportVmTool;
 
@@ -48,7 +47,9 @@ impl HyperVTool for ImportVmTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Import-VM".to_string()];
         if input.path.trim().is_empty() {
-            return Err(ToolError::InvalidInput("path must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "path must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Path '{}'", escape_ps_string(&input.path)));
         if let Some(generate_new_id) = &input.generate_new_id {
@@ -58,9 +59,14 @@ impl HyperVTool for ImportVmTool {
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='State';E={{$_.State.ToString()}}}}, @{{N='Uptime';E={{$_.Uptime.ToString()}}}}, ProcessorCount, MemoryAssigned | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -90,7 +96,6 @@ impl HyperVTool for ImportVmTool {
                 memory_assigned: vm["MemoryAssigned"].as_u64().unwrap_or_default(),
             });
         }
-
 
         Ok(ImportVmOutput { vms: output })
     }

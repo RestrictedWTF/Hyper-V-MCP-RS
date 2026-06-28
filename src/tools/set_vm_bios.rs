@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmBiosInput {
     /// Name of the Generation 1 virtual machine whose BIOS is to be configured.
-pub name: String,
+    pub name: String,
     /// Hyper-V host on which the virtual machine resides. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -77,7 +77,6 @@ impl HyperVTool for SetVmBiosTool {
                 args.push("-DisableNumLock".to_string());
             }
         }
-
 
         let ps = format!(
             "{} | ForEach-Object {{ [pscustomobject]@{{ \

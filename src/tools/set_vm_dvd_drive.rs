@@ -104,7 +104,6 @@ impl HyperVTool for SetVmDvdDriveTool {
             args.push("-AllowUnverifiedPaths".to_string());
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              VMName, ComputerName, ControllerNumber, ControllerLocation, Path, PoolName, IsDeleted \

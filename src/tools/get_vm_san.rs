@@ -37,14 +37,14 @@ pub struct GetVmSanOutput {
     pub sans: Vec<VmSanInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmSanTool;
 
 #[async_trait]
 impl HyperVTool for GetVmSanTool {
     const NAME: &'static str = "hyperv_get_vm_san";
-    const DESCRIPTION: &'static str = "Gets the available virtual machine storage area networks on a Hyper-V host or hosts.";
+    const DESCRIPTION: &'static str =
+        "Gets the available virtual machine storage area networks on a Hyper-V host or hosts.";
     type Input = GetVmSanInput;
     type Output = GetVmSanOutput;
 
@@ -52,15 +52,22 @@ impl HyperVTool for GetVmSanTool {
         let mut args = vec!["Get-VMSan".to_string()];
         if let Some(name) = &input.name {
             if name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Name '{}'", escape_ps_string(name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, @{{N='WorldWideNodeNameSetA';E={{$_.WorldWideNodeNameSetA.ToString()}}}}, @{{N='WorldWidePortNameSetA';E={{$_.WorldWidePortNameSetA.ToString()}}}}, @{{N='WorldWideNodeNameSetB';E={{$_.WorldWideNodeNameSetB.ToString()}}}}, @{{N='WorldWidePortNameSetB';E={{$_.WorldWidePortNameSetB.ToString()}}}}, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -84,18 +91,31 @@ impl HyperVTool for GetVmSanTool {
             output.push(VmSanInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmSanOutput { sans: output })
-
     }
 }
-
 
 register_tool!(GetVmSanTool);

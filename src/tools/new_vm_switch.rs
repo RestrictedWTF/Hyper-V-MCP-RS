@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct NewVmSwitchInput {
     /// Name of the new virtual switch.
-pub name: String,
+    pub name: String,
     /// Type of the virtual switch: External, Internal, or Private.
     #[serde(default, rename = "switchType")]
     pub switch_type: Option<String>,

@@ -43,14 +43,14 @@ pub struct GetVmFibreChannelHbaOutput {
     pub adapters: Vec<VmFibreChannelHbaInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmFibreChannelHbaTool;
 
 #[async_trait]
 impl HyperVTool for GetVmFibreChannelHbaTool {
     const NAME: &'static str = "hyperv_get_vm_fibre_channel_hba";
-    const DESCRIPTION: &'static str = "Gets the Fibre Channel host bus adapters associated with one or more virtual machines.";
+    const DESCRIPTION: &'static str =
+        "Gets the Fibre Channel host bus adapters associated with one or more virtual machines.";
     type Input = GetVmFibreChannelHbaInput;
     type Output = GetVmFibreChannelHbaOutput;
 
@@ -58,15 +58,22 @@ impl HyperVTool for GetVmFibreChannelHbaTool {
         let mut args = vec!["Get-VMFibreChannelHba".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, SanName, @{{N='WorldWideNodeNameSetA';E={{$_.WorldWideNodeNameSetA.ToString()}}}}, @{{N='WorldWidePortNameSetA';E={{$_.WorldWidePortNameSetA.ToString()}}}}, @{{N='WorldWideNodeNameSetB';E={{$_.WorldWideNodeNameSetB.ToString()}}}}, @{{N='WorldWidePortNameSetB';E={{$_.WorldWidePortNameSetB.ToString()}}}}, IsTemplate | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -93,18 +100,28 @@ impl HyperVTool for GetVmFibreChannelHbaTool {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
                 san_name: item["SanName"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 is_template: item["IsTemplate"].as_bool().unwrap_or_default(),
             });
         }
 
         Ok(GetVmFibreChannelHbaOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(GetVmFibreChannelHbaTool);

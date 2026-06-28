@@ -62,8 +62,7 @@ pub struct AddVmSwitchExtensionPortFeatureTool;
 #[async_trait]
 impl HyperVTool for AddVmSwitchExtensionPortFeatureTool {
     const NAME: &'static str = "hyperv_add_vm_switch_extension_port_feature";
-    const DESCRIPTION: &'static str =
-        "Adds a feature to a virtual network adapter.";
+    const DESCRIPTION: &'static str = "Adds a feature to a virtual network adapter.";
     type Input = AddVmSwitchExtensionPortFeatureInput;
     type Output = AddVmSwitchExtensionPortFeatureOutput;
 
@@ -108,10 +107,7 @@ impl HyperVTool for AddVmSwitchExtensionPortFeatureTool {
         if let Some(extension_id) = &input.extension_id {
             let extension_id = extension_id.trim();
             if !extension_id.is_empty() {
-                feature_args.push(format!(
-                    "-ExtensionId '{}'",
-                    escape_ps_string(extension_id)
-                ));
+                feature_args.push(format!("-ExtensionId '{}'", escape_ps_string(extension_id)));
             }
         }
         if let Some(computer) = &input.computer_name {

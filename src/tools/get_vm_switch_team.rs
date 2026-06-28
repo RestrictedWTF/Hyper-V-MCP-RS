@@ -31,7 +31,6 @@ pub struct GetVmSwitchTeamOutput {
     pub teams: Vec<VmSwitchTeamInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmSwitchTeamTool;
 
@@ -46,15 +45,22 @@ impl HyperVTool for GetVmSwitchTeamTool {
         let mut args = vec!["Get-VMSwitchTeam".to_string()];
         if let Some(name) = &input.name {
             if name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-Name '{}'", escape_ps_string(name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, NetAdapterNames, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -76,21 +82,25 @@ impl HyperVTool for GetVmSwitchTeamTool {
         let mut output = Vec::with_capacity(items.len());
         for item in items {
             let net_adapter_names = match &item["NetAdapterNames"] {
-                serde_json::Value::Array(arr) => arr.iter().map(|v| v.as_str().unwrap_or_default().to_string()).collect(),
+                serde_json::Value::Array(arr) => arr
+                    .iter()
+                    .map(|v| v.as_str().unwrap_or_default().to_string())
+                    .collect(),
                 _ => Vec::new(),
             };
             output.push(VmSwitchTeamInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
                 net_adapter_names,
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmSwitchTeamOutput { teams: output })
-
     }
 }
-
 
 register_tool!(GetVmSwitchTeamTool);

@@ -42,14 +42,14 @@ pub struct MeasureVmOutput {
     pub measurements: Vec<VmMeasuredResourceInfo>,
 }
 
-
 #[derive(Default)]
 pub struct MeasureVmTool;
 
 #[async_trait]
 impl HyperVTool for MeasureVmTool {
     const NAME: &'static str = "hyperv_measure_vm";
-    const DESCRIPTION: &'static str = "Reports resource utilization data for one or more virtual machines.";
+    const DESCRIPTION: &'static str =
+        "Reports resource utilization data for one or more virtual machines.";
     type Input = MeasureVmInput;
     type Output = MeasureVmOutput;
 
@@ -57,15 +57,22 @@ impl HyperVTool for MeasureVmTool {
         let mut args = vec!["Measure-VM".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, VMId, AvgCPU, AvgRAM, MaxRAM, MinRAM, TotalDisk, NetworkInbound, NetworkOutbound | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -99,10 +106,10 @@ impl HyperVTool for MeasureVmTool {
             });
         }
 
-        Ok(MeasureVmOutput { measurements: output })
-
+        Ok(MeasureVmOutput {
+            measurements: output,
+        })
     }
 }
-
 
 register_tool!(MeasureVmTool);

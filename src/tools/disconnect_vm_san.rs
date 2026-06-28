@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct DisconnectVmSanInput {
     /// Name of the virtual storage area network (SAN) from which to remove the host bus adapter.
-pub name: String,
+    pub name: String,
     /// World wide node name of the host bus adapter to remove.
     #[serde(rename = "worldWideNodeName")]
     pub world_wide_node_name: Vec<String>,
@@ -144,10 +144,7 @@ impl HyperVTool for DisconnectVmSanTool {
             output.push(VmSanInfo {
                 name: san["Name"].as_str().unwrap_or_default().to_string(),
                 note: san["Note"].as_str().map(String::from),
-                computer_name: san["ComputerName"]
-                    .as_str()
-                    .unwrap_or_default()
-                    .to_string(),
+                computer_name: san["ComputerName"].as_str().unwrap_or_default().to_string(),
                 world_wide_node_name: strings_from_value(&san["WorldWideNodeName"]),
                 world_wide_port_name: strings_from_value(&san["WorldWidePortName"]),
             });

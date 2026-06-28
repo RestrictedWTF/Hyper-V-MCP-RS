@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RemoveVmGroupMemberInput {
     /// Name of the virtual machine group.
-pub name: String,
+    pub name: String,
     /// Names of virtual machines to remove.
     #[serde(default, rename = "vmNames")]
     pub vm_names: Option<Vec<String>>,
@@ -38,28 +38,40 @@ impl HyperVTool for RemoveVmGroupMemberTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Remove-VMGroupMember".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if let Some(vm_names) = &input.vm_names {
-            let escaped: Vec<String> = vm_names.iter().map(|n| format!("'{}'", escape_ps_string(n))).collect();
+            let escaped: Vec<String> = vm_names
+                .iter()
+                .map(|n| format!("'{}'", escape_ps_string(n)))
+                .collect();
             args.push(format!("-VM {}", escaped.join(",")));
         }
         if let Some(vm_group_names) = &input.vm_group_names {
-            let escaped: Vec<String> = vm_group_names.iter().map(|n| format!("'{}'", escape_ps_string(n))).collect();
+            let escaped: Vec<String> = vm_group_names
+                .iter()
+                .map(|n| format!("'{}'", escape_ps_string(n)))
+                .collect();
             args.push(format!("-VMGroupMember {}", escaped.join(",")));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -67,6 +79,5 @@ impl HyperVTool for RemoveVmGroupMemberTool {
         Ok(RemoveVmGroupMemberOutput { success: true })
     }
 }
-
 
 register_tool!(RemoveVmGroupMemberTool);

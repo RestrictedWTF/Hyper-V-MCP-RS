@@ -33,20 +33,29 @@ impl HyperVTool for StartVmTraceTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Start-VMTrace".to_string()];
         if input.file_path.trim().is_empty() {
-            return Err(ToolError::InvalidInput("file_path must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "file_path must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-FilePath '{}'", escape_ps_string(&input.file_path)));
+        args.push(format!(
+            "-FilePath '{}'",
+            escape_ps_string(&input.file_path)
+        ));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = args.join(" ");
 
-        ctx
-            .sidecar
+        ctx.sidecar
             .execute(&ps, ctx.timeout)
             .await
             .map_err(|e| ToolError::Sidecar(e.to_string()))?;
@@ -54,6 +63,5 @@ impl HyperVTool for StartVmTraceTool {
         Ok(StartVmTraceOutput { success: true })
     }
 }
-
 
 register_tool!(StartVmTraceTool);

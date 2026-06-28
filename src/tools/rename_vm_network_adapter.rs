@@ -26,7 +26,7 @@ pub struct RenameVmNetworkAdapterInput {
     #[serde(default, rename = "vmName")]
     pub vm_name: Option<String>,
     /// Current name of the virtual network adapter.
-pub name: String,
+    pub name: String,
     /// New name for the network adapter.
     #[serde(rename = "newName")]
     pub new_name: String,
@@ -39,7 +39,6 @@ pub name: String,
 pub struct RenameVmNetworkAdapterOutput {
     pub adapters: Vec<VmNetworkAdapterRenameInfo>,
 }
-
 
 #[derive(Default)]
 pub struct RenameVmNetworkAdapterTool;
@@ -55,23 +54,34 @@ impl HyperVTool for RenameVmNetworkAdapterTool {
         let mut args = vec!["Rename-VMNetworkAdapter".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if input.new_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("new_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "new_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-NewName '{}'", escape_ps_string(&input.new_name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, MacAddress, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -98,14 +108,15 @@ impl HyperVTool for RenameVmNetworkAdapterTool {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
                 mac_address: item["MacAddress"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(RenameVmNetworkAdapterOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(RenameVmNetworkAdapterTool);

@@ -61,7 +61,6 @@ impl HyperVTool for DisableVmTpmTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object Name, Id, \
              @{{N='State';E={{$_.State.ToString()}}}}, \

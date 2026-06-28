@@ -143,7 +143,10 @@ impl HyperVTool for GetVmReplicationTool {
                     "Primary server name must not be empty".to_string(),
                 ));
             }
-            args.push(format!("-PrimaryServerName '{}'", escape_ps_string(primary)));
+            args.push(format!(
+                "-PrimaryServerName '{}'",
+                escape_ps_string(primary)
+            ));
         }
         if let Some(replica) = &input.replica_server_name {
             if replica.trim().is_empty() {
@@ -151,7 +154,10 @@ impl HyperVTool for GetVmReplicationTool {
                     "Replica server name must not be empty".to_string(),
                 ));
             }
-            args.push(format!("-ReplicaServerName '{}'", escape_ps_string(replica)));
+            args.push(format!(
+                "-ReplicaServerName '{}'",
+                escape_ps_string(replica)
+            ));
         }
         if let Some(rel_type) = &input.replication_relationship_type {
             if rel_type.trim().is_empty() {
@@ -219,10 +225,7 @@ impl HyperVTool for GetVmReplicationTool {
                 name: rep["Name"].as_str().unwrap_or_default().to_string(),
                 vm_name: rep["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: rep["VMId"].as_str().unwrap_or_default().to_string(),
-                computer_name: rep["ComputerName"]
-                    .as_str()
-                    .unwrap_or_default()
-                    .to_string(),
+                computer_name: rep["ComputerName"].as_str().unwrap_or_default().to_string(),
                 replica_server_display_name: rep["ReplicaServerDisplayName"]
                     .as_str()
                     .unwrap_or_default()
@@ -239,11 +242,9 @@ impl HyperVTool for GetVmReplicationTool {
                 application_consistent_snapshot_frequency: rep
                     ["ApplicationConsistentSnapshotFrequency"]
                     .as_u64()
-                    .unwrap_or_default() as u32,
-                compression: rep["Compression"]
-                    .as_str()
                     .unwrap_or_default()
-                    .to_string(),
+                    as u32,
+                compression: rep["Compression"].as_str().unwrap_or_default().to_string(),
                 backup_exclusions: strings_from(&rep["BackupExclusions"]),
                 replicated_disks: strings_from(&rep["ReplicatedDisks"]),
                 pending_replication_size: rep["PendingReplicationSize"]

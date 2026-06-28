@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmComPortInput {
     /// Name of the virtual machine whose COM port is to be configured.
-pub name: String,
+    pub name: String,
     /// Id (1 or 2) of the COM port to be configured.
     pub number: i32,
     /// Named pipe path for the COM port, e.g. \\.\pipe\PipeName.
@@ -77,7 +77,6 @@ impl HyperVTool for SetVmComPortTool {
         if let Some(mode) = &input.debugger_mode {
             args.push(format!("-DebuggerMode '{}'", escape_ps_string(mode)));
         }
-
 
         let ps = format!(
             "{} | Select-Object Name, VMName, Number, Path, \

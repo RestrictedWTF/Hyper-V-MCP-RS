@@ -39,14 +39,14 @@ pub struct GetVmGpuPartitionAdapterOutput {
     pub adapters: Vec<VmGpuPartitionAdapterInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmGpuPartitionAdapterTool;
 
 #[async_trait]
 impl HyperVTool for GetVmGpuPartitionAdapterTool {
     const NAME: &'static str = "hyperv_get_vm_gpu_partition_adapter";
-    const DESCRIPTION: &'static str = "Gets the information of assigned GPU partitions to a virtual machine.";
+    const DESCRIPTION: &'static str =
+        "Gets the information of assigned GPU partitions to a virtual machine.";
     type Input = GetVmGpuPartitionAdapterInput;
     type Output = GetVmGpuPartitionAdapterOutput;
 
@@ -54,15 +54,22 @@ impl HyperVTool for GetVmGpuPartitionAdapterTool {
         let mut args = vec!["Get-VMGpuPartitionAdapter".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, VMName, InstancePath, MinPartitionVRAM, MaxPartitionVRAM, OptimalPartitionVRAM, TotalVRAM | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -87,7 +94,10 @@ impl HyperVTool for GetVmGpuPartitionAdapterTool {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
-                instance_path: item["InstancePath"].as_str().unwrap_or_default().to_string(),
+                instance_path: item["InstancePath"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 min_partition_vram: item["MinPartitionVRAM"].as_u64().unwrap_or_default(),
                 max_partition_vram: item["MaxPartitionVRAM"].as_u64().unwrap_or_default(),
                 optimal_partition_vram: item["OptimalPartitionVRAM"].as_u64().unwrap_or_default(),
@@ -96,9 +106,7 @@ impl HyperVTool for GetVmGpuPartitionAdapterTool {
         }
 
         Ok(GetVmGpuPartitionAdapterOutput { adapters: output })
-
     }
 }
-
 
 register_tool!(GetVmGpuPartitionAdapterTool);

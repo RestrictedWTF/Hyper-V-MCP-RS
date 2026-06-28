@@ -13,7 +13,7 @@ pub struct DisconnectVmNetworkAdapterInput {
     #[serde(default, rename = "vmName")]
     pub vm_name: Option<String>,
     /// Name of the virtual network adapter to disconnect.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,

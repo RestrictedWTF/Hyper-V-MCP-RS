@@ -25,7 +25,7 @@ pub struct VmSanRenameInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RenameVmSanInput {
     /// Current name of the virtual SAN.
-pub name: String,
+    pub name: String,
     /// New name for the SAN.
     #[serde(rename = "newName")]
     pub new_name: String,
@@ -38,7 +38,6 @@ pub name: String,
 pub struct RenameVmSanOutput {
     pub sans: Vec<VmSanRenameInfo>,
 }
-
 
 #[derive(Default)]
 pub struct RenameVmSanTool;
@@ -53,18 +52,27 @@ impl HyperVTool for RenameVmSanTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Rename-VMSan".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if input.new_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("new_name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "new_name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-NewName '{}'", escape_ps_string(&input.new_name)));
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, WorldWideNodeNameSetA, WorldWidePortNameSetA, WorldWideNodeNameSetB, WorldWidePortNameSetB, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -88,18 +96,31 @@ impl HyperVTool for RenameVmSanTool {
             output.push(VmSanRenameInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(RenameVmSanOutput { sans: output })
-
     }
 }
-
 
 register_tool!(RenameVmSanTool);

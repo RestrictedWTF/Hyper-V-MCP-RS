@@ -104,7 +104,6 @@ impl HyperVTool for AddVmAssignableDeviceTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-
         let ps = format!(
             "{} | Select-Object VMName, LocationPath, InstancePath, ComputerName | ConvertTo-Json -Compress -Depth 3",
             args.join(" ")
@@ -127,10 +126,7 @@ impl HyperVTool for AddVmAssignableDeviceTool {
         let mut output = Vec::with_capacity(devices.len());
         for device in devices {
             output.push(VmAssignableDeviceInfo {
-                vm_name: device["VMName"]
-                    .as_str()
-                    .unwrap_or_default()
-                    .to_string(),
+                vm_name: device["VMName"].as_str().unwrap_or_default().to_string(),
                 location_path: device["LocationPath"]
                     .as_str()
                     .unwrap_or_default()

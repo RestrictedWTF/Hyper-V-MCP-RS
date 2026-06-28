@@ -38,14 +38,14 @@ pub struct GetVmSwitchExtensionSwitchDataOutput {
     pub data: Vec<VmSwitchExtensionSwitchDataInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmSwitchExtensionSwitchDataTool;
 
 #[async_trait]
 impl HyperVTool for GetVmSwitchExtensionSwitchDataTool {
     const NAME: &'static str = "hyperv_get_vm_switch_extension_switch_data";
-    const DESCRIPTION: &'static str = "Gets the status of a virtual switch extension feature applied on a virtual switch.";
+    const DESCRIPTION: &'static str =
+        "Gets the status of a virtual switch extension feature applied on a virtual switch.";
     type Input = GetVmSwitchExtensionSwitchDataInput;
     type Output = GetVmSwitchExtensionSwitchDataOutput;
 
@@ -53,21 +53,33 @@ impl HyperVTool for GetVmSwitchExtensionSwitchDataTool {
         let mut args = vec!["Get-VMSwitchExtensionSwitchData".to_string()];
         if let Some(feature_id) = &input.feature_id {
             if feature_id.trim().is_empty() {
-                return Err(ToolError::InvalidInput("feature_id must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "feature_id must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-FeatureId '{}'", escape_ps_string(feature_id)));
         }
         if let Some(vm_switch_name) = &input.vm_switch_name {
             if vm_switch_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_switch_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_switch_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-VMSwitchName '{}'", escape_ps_string(vm_switch_name)));
+            args.push(format!(
+                "-VMSwitchName '{}'",
+                escape_ps_string(vm_switch_name)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, FeatureId, VMSwitchName, Enabled, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -92,16 +104,20 @@ impl HyperVTool for GetVmSwitchExtensionSwitchDataTool {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
                 feature_id: item["FeatureId"].as_str().unwrap_or_default().to_string(),
-                vm_switch_name: item["VMSwitchName"].as_str().unwrap_or_default().to_string(),
+                vm_switch_name: item["VMSwitchName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
                 enabled: item["Enabled"].as_bool().unwrap_or_default(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmSwitchExtensionSwitchDataOutput { data: output })
-
     }
 }
-
 
 register_tool!(GetVmSwitchExtensionSwitchDataTool);

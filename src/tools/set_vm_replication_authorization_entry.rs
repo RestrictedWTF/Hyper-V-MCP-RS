@@ -81,7 +81,6 @@ impl HyperVTool for SetVmReplicationAuthorizationEntryTool {
             args.push(format!("-TrustGroup '{}'", escape_ps_string(group)));
         }
 
-
         let ps = format!(
             "{} | Select-Object AllowedPrimaryServer, ReplicaStorageLocation, TrustGroup | ConvertTo-Json -Compress -Depth 3",
             args.join(" ")

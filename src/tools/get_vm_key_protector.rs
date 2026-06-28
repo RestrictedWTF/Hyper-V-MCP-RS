@@ -31,7 +31,6 @@ pub struct GetVmKeyProtectorOutput {
     pub protectors: Vec<VmKeyProtectorInfo>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmKeyProtectorTool;
 
@@ -46,15 +45,22 @@ impl HyperVTool for GetVmKeyProtectorTool {
         let mut args = vec!["Get-VMKeyProtector".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object VMName, VMId, @{{N='KeyProtector';E={{[Convert]::ToBase64String($_.KeyProtector)}}}} | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -78,14 +84,15 @@ impl HyperVTool for GetVmKeyProtectorTool {
             output.push(VmKeyProtectorInfo {
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
-                key_protector: item["KeyProtector"].as_str().unwrap_or_default().to_string(),
+                key_protector: item["KeyProtector"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmKeyProtectorOutput { protectors: output })
-
     }
 }
-
 
 register_tool!(GetVmKeyProtectorTool);

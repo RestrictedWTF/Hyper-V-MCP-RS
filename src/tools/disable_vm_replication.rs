@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct DisableVmReplicationInput {
     /// Name of the virtual machine whose replication is to be disabled.
-pub name: String,
+    pub name: String,
     /// Hyper-V host to target. Defaults to localhost.
     #[serde(default, rename = "computerName")]
     pub computer_name: Option<String>,
@@ -57,7 +57,6 @@ impl HyperVTool for DisableVmReplicationTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-
 
         let ps = format!(
             "{} | Select-Object VMName, VMId, \

@@ -76,7 +76,6 @@ impl HyperVTool for SetVmVideoTool {
             args.push(format!("-VerticalResolution {}", vertical));
         }
 
-
         let ps = format!(
             "{} | Select-Object \
              @{{N='VMName';E={{$_.VMName}}}}, \

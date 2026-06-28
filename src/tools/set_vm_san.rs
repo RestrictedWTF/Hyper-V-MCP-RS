@@ -25,7 +25,7 @@ pub struct VmSanSetInfo {
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct SetVmSanInput {
     /// Name of the virtual SAN.
-pub name: String,
+    pub name: String,
     /// World-wide node name of address set A.
     #[serde(default, rename = "worldWideNodeNameSetA")]
     pub world_wide_node_name_set_a: Option<String>,
@@ -48,52 +48,79 @@ pub struct SetVmSanOutput {
     pub sans: Vec<VmSanSetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmSanTool;
 
 #[async_trait]
 impl HyperVTool for SetVmSanTool {
     const NAME: &'static str = "hyperv_set_vm_san";
-    const DESCRIPTION: &'static str = "Configures a virtual storage area network (SAN) on one or more Hyper-V hosts.";
+    const DESCRIPTION: &'static str =
+        "Configures a virtual storage area network (SAN) on one or more Hyper-V hosts.";
     type Input = SetVmSanInput;
     type Output = SetVmSanOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMSan".to_string()];
         if input.name.trim().is_empty() {
-            return Err(ToolError::InvalidInput("name must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "name must not be empty".to_string(),
+            ));
         }
         args.push(format!("-Name '{}'", escape_ps_string(&input.name)));
         if let Some(world_wide_node_name_set_a) = &input.world_wide_node_name_set_a {
             if world_wide_node_name_set_a.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_node_name_set_a must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_node_name_set_a must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWideNodeNameSetA '{}'", escape_ps_string(world_wide_node_name_set_a)));
+            args.push(format!(
+                "-WorldWideNodeNameSetA '{}'",
+                escape_ps_string(world_wide_node_name_set_a)
+            ));
         }
         if let Some(world_wide_port_name_set_a) = &input.world_wide_port_name_set_a {
             if world_wide_port_name_set_a.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_port_name_set_a must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_port_name_set_a must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWidePortNameSetA '{}'", escape_ps_string(world_wide_port_name_set_a)));
+            args.push(format!(
+                "-WorldWidePortNameSetA '{}'",
+                escape_ps_string(world_wide_port_name_set_a)
+            ));
         }
         if let Some(world_wide_node_name_set_b) = &input.world_wide_node_name_set_b {
             if world_wide_node_name_set_b.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_node_name_set_b must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_node_name_set_b must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWideNodeNameSetB '{}'", escape_ps_string(world_wide_node_name_set_b)));
+            args.push(format!(
+                "-WorldWideNodeNameSetB '{}'",
+                escape_ps_string(world_wide_node_name_set_b)
+            ));
         }
         if let Some(world_wide_port_name_set_b) = &input.world_wide_port_name_set_b {
             if world_wide_port_name_set_b.trim().is_empty() {
-                return Err(ToolError::InvalidInput("world_wide_port_name_set_b must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "world_wide_port_name_set_b must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-WorldWidePortNameSetB '{}'", escape_ps_string(world_wide_port_name_set_b)));
+            args.push(format!(
+                "-WorldWidePortNameSetB '{}'",
+                escape_ps_string(world_wide_port_name_set_b)
+            ));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, WorldWideNodeNameSetA, WorldWidePortNameSetA, WorldWideNodeNameSetB, WorldWidePortNameSetB, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -117,18 +144,31 @@ impl HyperVTool for SetVmSanTool {
             output.push(VmSanSetInfo {
                 name: item["Name"].as_str().unwrap_or_default().to_string(),
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_a: item["WorldWidePortNameSetA"].as_str().unwrap_or_default().to_string(),
-                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"].as_str().unwrap_or_default().to_string(),
-                world_wide_port_name_set_b: item["WorldWidePortNameSetB"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                world_wide_node_name_set_a: item["WorldWideNodeNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_a: item["WorldWidePortNameSetA"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_node_name_set_b: item["WorldWideNodeNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                world_wide_port_name_set_b: item["WorldWidePortNameSetB"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmSanOutput { sans: output })
-
     }
 }
-
 
 register_tool!(SetVmSanTool);

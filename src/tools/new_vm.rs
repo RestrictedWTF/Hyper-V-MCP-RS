@@ -9,7 +9,7 @@ use crate::tool::{HyperVTool, ToolContext, ToolError};
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct NewVmInput {
     /// Name of the new virtual machine.
-pub name: String,
+    pub name: String,
     /// Amount of memory, in bytes, to assign to the virtual machine.
     pub memory_startup_bytes: u64,
     /// Generation of the virtual machine. Defaults to 1 if omitted.

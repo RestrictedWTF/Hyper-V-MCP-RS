@@ -39,7 +39,6 @@ pub struct SetVmSwitchExtensionPortFeatureOutput {
     pub features: Vec<VmSwitchExtensionFeatureSetInfo>,
 }
 
-
 #[derive(Default)]
 pub struct SetVmSwitchExtensionPortFeatureTool;
 
@@ -53,24 +52,41 @@ impl HyperVTool for SetVmSwitchExtensionPortFeatureTool {
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         let mut args = vec!["Set-VMSwitchExtensionPortFeature".to_string()];
         if input.feature_id.trim().is_empty() {
-            return Err(ToolError::InvalidInput("feature_id must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "feature_id must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-FeatureId '{}'", escape_ps_string(&input.feature_id)));
+        args.push(format!(
+            "-FeatureId '{}'",
+            escape_ps_string(&input.feature_id)
+        ));
         if input.vm_network_adapter.trim().is_empty() {
-            return Err(ToolError::InvalidInput("vm_network_adapter must not be empty".to_string()));
+            return Err(ToolError::InvalidInput(
+                "vm_network_adapter must not be empty".to_string(),
+            ));
         }
-        args.push(format!("-VMNetworkAdapter '{}'", escape_ps_string(&input.vm_network_adapter)));
+        args.push(format!(
+            "-VMNetworkAdapter '{}'",
+            escape_ps_string(&input.vm_network_adapter)
+        ));
         if let Some(config_data) = &input.config_data {
             if config_data.trim().is_empty() {
-                return Err(ToolError::InvalidInput("config_data must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "config_data must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-ConfigData '{}'", escape_ps_string(config_data)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object Name, Id, FeatureId, Enabled, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -96,14 +112,15 @@ impl HyperVTool for SetVmSwitchExtensionPortFeatureTool {
                 id: item["Id"].as_str().unwrap_or_default().to_string(),
                 feature_id: item["FeatureId"].as_str().unwrap_or_default().to_string(),
                 enabled: item["Enabled"].as_bool().unwrap_or_default(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(SetVmSwitchExtensionPortFeatureOutput { features: output })
-
     }
 }
-
 
 register_tool!(SetVmSwitchExtensionPortFeatureTool);

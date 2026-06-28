@@ -29,16 +29,13 @@ pub struct AddVmSwitchTeamMemberTool;
 #[async_trait]
 impl HyperVTool for AddVmSwitchTeamMemberTool {
     const NAME: &'static str = "hyperv_add_vm_switch_team_member";
-    const DESCRIPTION: &'static str =
-        "Adds members to a virtual switch team.";
+    const DESCRIPTION: &'static str = "Adds members to a virtual switch team.";
     type Input = AddVmSwitchTeamMemberInput;
     type Output = AddVmSwitchTeamMemberOutput;
 
     async fn run(&self, ctx: &ToolContext, input: Self::Input) -> Result<Self::Output, ToolError> {
         if input.team_name.trim().is_empty() {
-            return Err(ToolError::InvalidInput(
-                "team_name is required".to_string(),
-            ));
+            return Err(ToolError::InvalidInput("team_name is required".to_string()));
         }
         if input.net_adapter_name.trim().is_empty() {
             return Err(ToolError::InvalidInput(
@@ -76,7 +73,9 @@ impl HyperVTool for AddVmSwitchTeamMemberTool {
         if let Some(obj) = raw.as_object() {
             if let Some(err) = obj.get("Error") {
                 return Err(ToolError::Sidecar(
-                    err.as_str().unwrap_or("Unknown PowerShell error").to_string(),
+                    err.as_str()
+                        .unwrap_or("Unknown PowerShell error")
+                        .to_string(),
                 ));
             }
         }

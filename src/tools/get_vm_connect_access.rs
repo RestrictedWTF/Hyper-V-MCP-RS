@@ -36,7 +36,6 @@ pub struct GetVmConnectAccessOutput {
     pub entries: Vec<VmConnectAccessEntry>,
 }
 
-
 #[derive(Default)]
 pub struct GetVmConnectAccessTool;
 
@@ -51,21 +50,30 @@ impl HyperVTool for GetVmConnectAccessTool {
         let mut args = vec!["Get-VMConnectAccess".to_string()];
         if let Some(vm_name) = &input.vm_name {
             if vm_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("vm_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "vm_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-VMName '{}'", escape_ps_string(vm_name)));
         }
         if let Some(user_name) = &input.user_name {
             if user_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("user_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "user_name must not be empty when provided".to_string(),
+                ));
             }
             args.push(format!("-UserName '{}'", escape_ps_string(user_name)));
         }
         if let Some(computer_name) = &input.computer_name {
             if computer_name.trim().is_empty() {
-                return Err(ToolError::InvalidInput("computer_name must not be empty when provided".to_string()));
+                return Err(ToolError::InvalidInput(
+                    "computer_name must not be empty when provided".to_string(),
+                ));
             }
-            args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
+            args.push(format!(
+                "-ComputerName '{}'",
+                escape_ps_string(computer_name)
+            ));
         }
 
         let ps = format!("{} | Select-Object UserName, VMName, VMId, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
@@ -90,14 +98,15 @@ impl HyperVTool for GetVmConnectAccessTool {
                 user_name: item["UserName"].as_str().unwrap_or_default().to_string(),
                 vm_name: item["VMName"].as_str().unwrap_or_default().to_string(),
                 vm_id: item["VMId"].as_str().unwrap_or_default().to_string(),
-                computer_name: item["ComputerName"].as_str().unwrap_or_default().to_string(),
+                computer_name: item["ComputerName"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_string(),
             });
         }
 
         Ok(GetVmConnectAccessOutput { entries: output })
-
     }
 }
-
 
 register_tool!(GetVmConnectAccessTool);
