@@ -78,7 +78,6 @@ impl HyperVTool for SetVmBiosTool {
             }
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | ForEach-Object {{ [pscustomobject]@{{ \

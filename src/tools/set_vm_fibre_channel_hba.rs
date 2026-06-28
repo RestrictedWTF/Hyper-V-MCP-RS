@@ -109,7 +109,6 @@ impl HyperVTool for SetVmFibreChannelHbaTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
         }
 
-        args.push("-PassThru".to_string());
         let ps = format!("{} | Select-Object Name, Id, VMName, VMId, SanName, WorldWideNodeNameSetA, WorldWidePortNameSetA, WorldWideNodeNameSetB, WorldWidePortNameSetB, IsTemplate | ConvertTo-Json -Compress -Depth 3", args.join(" "));
 
         let json = ctx

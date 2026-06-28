@@ -171,7 +171,6 @@ impl HyperVTool for SetVmHostTool {
             args.push(format!("-EnableEnhancedSessionMode ${}", enabled));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

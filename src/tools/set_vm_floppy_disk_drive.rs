@@ -78,7 +78,6 @@ impl HyperVTool for SetVmFloppyDiskDriveTool {
             args.push(format!("-ResourcePoolName '{}'", escape_ps_string(pool)));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, \

@@ -82,7 +82,6 @@ impl HyperVTool for StopVmTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
 
-        args.push("-PassThru".to_string());
         args.push("-Confirm:$false".to_string());
 
         let ps = format!(

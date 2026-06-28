@@ -78,7 +78,6 @@ impl HyperVTool for SetVmSecurityTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
         }
 
-        args.push("-PassThru".to_string());
         let ps = format!("{} | Select-Object VMName, VMId, TpmEnabled, KsdEnabled, Shielded, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
 
         let json = ctx

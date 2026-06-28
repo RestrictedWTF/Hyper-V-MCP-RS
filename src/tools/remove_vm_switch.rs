@@ -68,7 +68,6 @@ impl HyperVTool for RemoveVmSwitchTool {
             args.push("-Force".to_string());
         }
 
-        args.push("-PassThru".to_string());
         args.push("-Confirm:$false".to_string());
 
         let ps = format!(

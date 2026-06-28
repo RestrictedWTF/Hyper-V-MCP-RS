@@ -83,7 +83,6 @@ impl HyperVTool for ResumeVmReplicationTool {
             args.push("-Resynchronize".to_string());
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object VMName, ComputerName, PrimaryServerName, ReplicaServerName, \

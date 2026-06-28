@@ -166,7 +166,6 @@ impl HyperVTool for SetVmNetworkAdapterTool {
             args.push(format!("-PacketDirectEnabled ${}", enabled));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, IsLegacy, SwitchName, MacAddress, \

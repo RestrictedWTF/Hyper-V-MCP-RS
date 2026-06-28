@@ -222,7 +222,6 @@ impl HyperVTool for SetVmReplicationTool {
             args.push("-UseBackup".to_string());
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

@@ -151,7 +151,6 @@ impl HyperVTool for AddVmNetworkAdapterRoutingDomainMappingTool {
             }
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

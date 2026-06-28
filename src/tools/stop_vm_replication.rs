@@ -62,7 +62,6 @@ impl HyperVTool for StopVmReplicationTool {
             ));
         }
 
-        args.push("-PassThru".to_string());
         args.push("-Confirm:$false".to_string());
 
         let ps = format!(

@@ -184,7 +184,6 @@ impl HyperVTool for AddVmNetworkAdapterExtendedAclTool {
             }
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

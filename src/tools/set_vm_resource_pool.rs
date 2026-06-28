@@ -72,7 +72,6 @@ impl HyperVTool for SetVmResourcePoolTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
         }
 
-        args.push("-PassThru".to_string());
         let ps = format!("{} | Select-Object Name, Id, ResourcePoolType, ParentName, ComputerName | ConvertTo-Json -Compress -Depth 3", args.join(" "));
 
         let json = ctx

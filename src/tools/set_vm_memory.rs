@@ -113,7 +113,6 @@ impl HyperVTool for SetVmMemoryTool {
             args.push(format!("-SmartPagingFilePath '{}'", escape_ps_string(path)));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

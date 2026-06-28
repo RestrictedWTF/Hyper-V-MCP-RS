@@ -76,7 +76,6 @@ impl HyperVTool for SetVmVideoTool {
             args.push(format!("-VerticalResolution {}", vertical));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

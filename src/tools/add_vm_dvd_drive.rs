@@ -126,7 +126,6 @@ impl HyperVTool for AddVmDvdDriveTool {
             args.push("-AllowUnverifiedPaths".to_string());
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, Id, VMName, VMId, Path, ControllerNumber, ControllerLocation, \

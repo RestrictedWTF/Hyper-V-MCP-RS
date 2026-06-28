@@ -78,7 +78,6 @@ impl HyperVTool for SetVmComPortTool {
             args.push(format!("-DebuggerMode '{}'", escape_ps_string(mode)));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, VMName, Number, Path, \

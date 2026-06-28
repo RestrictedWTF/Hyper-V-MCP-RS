@@ -109,7 +109,6 @@ impl HyperVTool for SetVmNetworkAdapterTeamMappingTool {
             args.push(format!("-SwitchName '{}'", escape_ps_string(switch)));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

@@ -85,7 +85,6 @@ impl HyperVTool for SetVmFirmwareTool {
             args.push(format!("-AllowLegacyNetworkAdapter ${}", allow));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object VMName, \

@@ -147,7 +147,6 @@ impl HyperVTool for SetVmProcessorTool {
             args.push(format!("-ExposeVirtualizationExtensions ${}", enabled));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

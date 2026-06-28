@@ -64,7 +64,6 @@ impl HyperVTool for DebugVmTool {
         if input.inject_non_maskable_interrupt {
             args.push("-InjectNonMaskableInterrupt".to_string());
         }
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, Id, \

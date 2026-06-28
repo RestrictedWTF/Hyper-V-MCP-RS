@@ -176,7 +176,6 @@ impl HyperVTool for SetVmReplicationServerTool {
             args.push("-Force".to_string());
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

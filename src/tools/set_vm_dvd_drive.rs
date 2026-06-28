@@ -104,7 +104,6 @@ impl HyperVTool for SetVmDvdDriveTool {
             args.push("-AllowUnverifiedPaths".to_string());
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

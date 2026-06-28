@@ -223,7 +223,6 @@ impl HyperVTool for RemoveVmNetworkAdapterAclTool {
             push_string_array_arg(&mut args, "RemoteMacAddress", addresses);
         }
 
-        args.push("-PassThru".to_string());
         args.push("-Confirm:$false".to_string());
 
         let ps = format!(

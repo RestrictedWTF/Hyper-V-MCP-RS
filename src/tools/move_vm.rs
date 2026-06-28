@@ -158,7 +158,6 @@ impl HyperVTool for MoveVmTool {
         if input.remove_source_unmanaged_vhds {
             args.push("-RemoveSourceUnmanagedVhds".to_string());
         }
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, Id, \

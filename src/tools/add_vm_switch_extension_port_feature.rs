@@ -146,7 +146,6 @@ impl HyperVTool for AddVmSwitchExtensionPortFeatureTool {
         }
 
         add_args.push("-VMSwitchExtensionPortFeature $feature".to_string());
-        add_args.push("-PassThru".to_string());
 
         let ps = format!(
             "$feature = {}; {} | Select-Object \

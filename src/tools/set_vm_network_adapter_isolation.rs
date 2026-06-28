@@ -126,7 +126,6 @@ impl HyperVTool for SetVmNetworkAdapterIsolationTool {
             args.push(format!("-MultiTenantStack '{}'", escape_ps_string(stack)));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

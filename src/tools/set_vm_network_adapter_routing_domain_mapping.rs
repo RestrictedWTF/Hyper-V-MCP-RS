@@ -195,7 +195,6 @@ impl HyperVTool for SetVmNetworkAdapterRoutingDomainMappingTool {
             args.push(format!("-IsolationName {}", names));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

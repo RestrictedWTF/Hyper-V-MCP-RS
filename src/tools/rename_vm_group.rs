@@ -71,7 +71,6 @@ impl HyperVTool for RenameVmGroupTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
         }
 
-        args.push("-PassThru".to_string());
         let ps = format!("{} | Select-Object Name, Id, @{{N='GroupType';E={{$_.GroupType.ToString()}}}}, VMMembers, VMGroupMembers, ComputerName | ConvertTo-Json -Compress -Depth 10", args.join(" "));
 
         let json = ctx

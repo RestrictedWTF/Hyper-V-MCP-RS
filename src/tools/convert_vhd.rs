@@ -121,7 +121,6 @@ impl HyperVTool for ConvertVhdTool {
         if let Some(computer) = &input.computer_name {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Path, \

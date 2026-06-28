@@ -72,7 +72,6 @@ impl HyperVTool for SuspendVmReplicationTool {
             ));
         }
 
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object VMName, \

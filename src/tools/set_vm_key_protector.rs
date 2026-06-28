@@ -62,7 +62,6 @@ impl HyperVTool for SetVmKeyProtectorTool {
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer_name)));
         }
 
-        args.push("-PassThru".to_string());
         let ps = format!("{} | Select-Object VMName, VMId, @{{N='KeyProtector';E={{$_.KeyProtector.ToString()}}}} | ConvertTo-Json -Compress -Depth 3", args.join(" "));
 
         let json = ctx

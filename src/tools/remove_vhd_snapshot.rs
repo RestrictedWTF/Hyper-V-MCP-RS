@@ -84,7 +84,6 @@ impl HyperVTool for RemoveVhdSnapshotTool {
             args.push("-PersistReferencePoint".to_string());
         }
 
-        args.push("-PassThru".to_string());
         args.push("-Confirm:$false".to_string());
 
         let ps = format!(

@@ -46,7 +46,6 @@ impl HyperVTool for EnableVmMigrationTool {
             }
             args.push(format!("-ComputerName '{}'", escape_ps_string(computer)));
         }
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object \

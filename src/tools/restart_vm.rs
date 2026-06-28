@@ -55,7 +55,6 @@ impl HyperVTool for RestartVmTool {
         if input.force {
             args.push("-Force".to_string());
         }
-        args.push("-PassThru".to_string());
 
         let ps = format!(
             "{} | Select-Object Name, Id, \

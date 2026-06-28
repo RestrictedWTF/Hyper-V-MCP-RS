@@ -80,7 +80,7 @@ impl HyperVTool for AddVmSwitchExtensionSwitchFeatureTool {
         let ps = format!(
             "$feature = Get-VMSystemSwitchExtensionSwitchFeature -FeatureName '{}'{} | Select-Object -First 1; \
              if ($feature -eq $null) {{ throw \"No switch extension switch feature named '{}' was found\" }}; \
-             Add-VMSwitchExtensionSwitchFeature -SwitchName '{}'{} -VMSwitchExtensionFeature $feature -PassThru | \
+             Add-VMSwitchExtensionSwitchFeature -SwitchName '{}'{} -VMSwitchExtensionFeature $feature | \
              Select-Object Id, ExtensionId, ExtensionName, Name, IsDeleted, ComputerName, SettingData | \
              ConvertTo-Json -Compress -Depth 10",
             escape_ps_string(feature_name),

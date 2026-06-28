@@ -113,7 +113,7 @@ impl HyperVTool for NewVmTool {
         }
 
         let ps = format!(
-            "{} -PassThru | Select-Object Name, Id, \
+            "{} | Select-Object Name, Id, \
              @{{N='State';E={{$_.State.ToString()}}}}, \
              @{{N='Uptime';E={{$_.Uptime.ToString()}}}}, \
              ProcessorCount, \
