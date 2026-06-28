@@ -126,28 +126,14 @@ impl CredentialStore {
 
 pub struct ConfigManager {
     pub config: Config,
-    pub credentials: CredentialStore,
+    pub credentials: std::sync::RwLock<CredentialStore>,
 }
 
 impl ConfigManager {
     pub fn load() -> Self {
-        let config = match Config::load() {
-            Ok(cfg) => cfg,
-            Err(err) => {
-                tracing::warn!("failed to load config, using defaults: {err}");
-                Config::default()
-            }
-        };
-        let credentials = match CredentialStore::load() {
-            Ok(store) => store,
-            Err(err) => {
-                tracing::warn!("failed to load credentials, using defaults: {err}");
-                CredentialStore::default()
-            }
-        };
         Self {
-            config,
-            credentials,
+            config: Config::load().unwrap_or_default(),
+            credentials: std::sync::RwLock::new(CredentialStore::load().unwrap_or_default()),
         }
     }
 
@@ -164,7 +150,9 @@ impl ConfigManager {
             });
         }
 
-        if let Some(entry) = self.credentials.vms.get(vm_name) {
+        let credentials = self.credentials.read().ok()?;
+
+        if let Some(entry) = credentials.vms.get(vm_name) {
             if let Ok(password) = entry.decrypt_password() {
                 return Some(ResolvedCredential {
                     username: entry.username.clone(),
@@ -261,16 +249,16 @@ mod tests {
 
     #[test]
     fn credential_resolution_order() {
-        let mut manager = ConfigManager {
+        let manager = ConfigManager {
             config: Config {
                 default_credential: Some(
                     EncryptedCredential::encrypt("Default", "DefPass").unwrap(),
                 ),
                 ..Default::default()
             },
-            credentials: CredentialStore::default(),
+            credentials: std::sync::RwLock::new(CredentialStore::default()),
         };
-        manager.credentials.set(
+        manager.credentials.write().unwrap().set(
             "VM1",
             EncryptedCredential::encrypt("VmUser", "VmPass").unwrap(),
         );
@@ -295,7 +283,7 @@ mod tests {
         // no match
         let manager2 = ConfigManager {
             config: Config::default(),
-            credentials: CredentialStore::default(),
+            credentials: std::sync::RwLock::new(CredentialStore::default()),
         };
         assert!(manager2.resolve("VMX", None, None).is_none());
     }
