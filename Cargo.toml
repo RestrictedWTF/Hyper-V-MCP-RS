@@ -16,6 +16,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 async-trait = "0.1"
 anyhow = "1"
 base64 = "0.22.1"
+windows = { version = "0.58", features = ["Win32_Security_Cryptography", "Win32_Foundation"] }
 
 [dev-dependencies]
 tokio-test = "0.4"
