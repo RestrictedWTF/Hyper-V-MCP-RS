@@ -18,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
     let server = HypervServer::new().await?;
 
     // Elevation check
-    let elevation_check = "([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole('Administrator') | ConvertTo-Json -Compress";
+    let elevation_check = "([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) | ConvertTo-Json -Compress";
     let result = server
         .sidecar_execute(elevation_check, Duration::from_secs(5))
         .await;
