@@ -23,6 +23,7 @@ pub mod complete_vm_failover;
 pub mod connect_vm_network_adapter;
 pub mod connect_vm_san;
 pub mod convert_vhd;
+pub mod copy_from_guest;
 pub mod copy_to_guest;
 pub mod copy_vm_file;
 pub mod debug_vm;
