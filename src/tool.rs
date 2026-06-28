@@ -6,12 +6,14 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::config::ConfigManager;
 use crate::sidecar::{SidecarClient, SidecarError};
 
 #[derive(Clone)]
 pub struct ToolContext {
     pub sidecar: Arc<SidecarClient>,
     pub timeout: Duration,
+    pub config: Arc<ConfigManager>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -53,7 +55,9 @@ pub trait HyperVTool: Default + Send + Sync + 'static {
 pub type ToolRunFn = for<'a> fn(
     &'a ToolContext,
     serde_json::Value,
-) -> Pin<Box<dyn Future<Output = Result<serde_json::Value, ToolError>> + Send + 'a>>;
+) -> Pin<
+    Box<dyn Future<Output = Result<serde_json::Value, ToolError>> + Send + 'a>,
+>;
 
 pub struct ToolMeta {
     pub name: &'static str,
@@ -71,7 +75,8 @@ fn strip_numeric_formats(schema: &mut serde_json::Value) {
             if let Some(s) = t.as_str() {
                 s == "integer" || s == "number"
             } else if let Some(arr) = t.as_array() {
-                arr.iter().any(|v| v.as_str() == Some("integer") || v.as_str() == Some("number"))
+                arr.iter()
+                    .any(|v| v.as_str() == Some("integer") || v.as_str() == Some("number"))
             } else {
                 false
             }

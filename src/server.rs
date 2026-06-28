@@ -4,6 +4,7 @@ use std::time::Duration;
 use rmcp::{model::*, service::RequestContext, ErrorData as McpError, RoleServer, ServerHandler};
 use tracing::error;
 
+use crate::config::ConfigManager;
 use crate::resources;
 use crate::sidecar::SidecarClient;
 use crate::tool::{ToolContext, ToolMeta};
@@ -16,10 +17,15 @@ pub struct HypervServer {
 impl HypervServer {
     pub async fn new() -> anyhow::Result<Self> {
         let sidecar = Arc::new(SidecarClient::new().await?);
+        let config = Arc::new(ConfigManager::load());
+        let timeout = Duration::from_secs(
+            config.config.powershell_direct_timeout_seconds.unwrap_or(30),
+        );
         Ok(Self {
             ctx: ToolContext {
                 sidecar,
-                timeout: Duration::from_secs(30),
+                timeout,
+                config,
             },
         })
     }
