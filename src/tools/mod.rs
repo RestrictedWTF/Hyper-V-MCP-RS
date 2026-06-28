@@ -110,6 +110,7 @@ pub mod get_vmsystemswitchextensionportfeature;
 pub mod grant_vm_connect_access;
 pub mod import_vm;
 pub mod import_vminitialreplication;
+pub mod invoke_guest_command;
 pub mod measure_vm;
 pub mod measure_vm_replication;
 pub mod measure_vm_resource_pool;
