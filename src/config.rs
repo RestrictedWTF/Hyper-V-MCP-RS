@@ -131,9 +131,23 @@ pub struct ConfigManager {
 
 impl ConfigManager {
     pub fn load() -> Self {
+        let config = match Config::load() {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!("failed to load config: {}, using defaults", e);
+                Config::default()
+            }
+        };
+        let credentials = match CredentialStore::load() {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!("failed to load credentials: {}, using defaults", e);
+                CredentialStore::default()
+            }
+        };
         Self {
-            config: Config::load().unwrap_or_default(),
-            credentials: std::sync::RwLock::new(CredentialStore::load().unwrap_or_default()),
+            config,
+            credentials: std::sync::RwLock::new(credentials),
         }
     }
 

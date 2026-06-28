@@ -43,18 +43,14 @@ impl HyperVTool for RegisterVmCredentialTool {
         let encrypted = EncryptedCredential::encrypt(&input.username, &input.password)
             .map_err(|e| ToolError::Sidecar(format!("failed to encrypt credential: {}", e)))?;
 
-        {
+        let store_to_save = {
             let mut store = ctx.config.credentials.write().map_err(|e| {
                 ToolError::Sidecar(format!("failed to lock credential store: {}", e))
             })?;
             store.set(&input.vm_name, encrypted);
-        }
-
-        let store =
-            ctx.config.credentials.read().map_err(|e| {
-                ToolError::Sidecar(format!("failed to lock credential store: {}", e))
-            })?;
-        store
+            store.clone()
+        };
+        store_to_save
             .save()
             .map_err(|e| ToolError::Sidecar(format!("failed to save credentials: {}", e)))?;
 
