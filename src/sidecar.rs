@@ -27,9 +27,11 @@ pub struct SidecarResponse {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct SidecarError {
+    #[serde(rename = "Message", default)]
     pub message: String,
+    #[serde(rename = "Category", default)]
     pub category: String,
-    #[serde(rename = "fullyQualifiedErrorId")]
+    #[serde(rename = "FullyQualifiedErrorId", default)]
     pub fully_qualified_error_id: String,
 }
 
