@@ -45,6 +45,42 @@ pub struct SidecarClient {
     inner: Mutex<SidecarClientInner>,
 }
 
+/// Internal execution error variants so we can react differently to a
+/// desynchronized sidecar (stale response in stdout) versus a timeout or
+/// a genuine PowerShell/runtime failure.
+#[derive(Debug)]
+enum ExecuteError {
+    /// The response we read did not match the request id. This happens when a
+    /// previous request was cancelled/timed out after its command was already
+    /// sent to the sidecar; the sidecar still emitted a response that is now
+    /// buffered in stdout.
+    Mismatch { expected: u64, got: u64 },
+    /// The sidecar did not produce a response within the allotted time.
+    Timeout,
+    /// Any other error (I/O, JSON parse, PowerShell exception, etc.).
+    Other(anyhow::Error),
+}
+
+impl From<std::io::Error> for ExecuteError {
+    fn from(e: std::io::Error) -> Self {
+        ExecuteError::Other(e.into())
+    }
+}
+
+impl ExecuteError {
+    fn into_anyhow(self) -> anyhow::Error {
+        match self {
+            ExecuteError::Mismatch { expected, got } => anyhow::anyhow!(
+                "sidecar response id mismatch: expected {}, got {}",
+                expected,
+                got
+            ),
+            ExecuteError::Timeout => anyhow::anyhow!("deadline has elapsed"),
+            ExecuteError::Other(e) => e,
+        }
+    }
+}
+
 impl SidecarClient {
     pub async fn new() -> anyhow::Result<Self> {
         let inner = Self::spawn_inner().await?;
@@ -106,12 +142,29 @@ impl SidecarClient {
 
         match Self::execute_inner(&mut inner, id, &request_json, timeout_duration).await {
             Ok(result) => Ok(result),
-            Err(e) if Self::is_dead(&mut inner) => {
+            Err(ExecuteError::Mismatch { expected, got }) => {
+                error!(
+                    "sidecar response id mismatch (expected {}, got {}); restarting sidecar and retrying",
+                    expected, got
+                );
+                *inner = Self::spawn_inner().await?;
+                Self::execute_inner(&mut inner, id, &request_json, timeout_duration)
+                    .await
+                    .map_err(|e| e.into_anyhow())
+            }
+            Err(ExecuteError::Timeout) => {
+                error!("sidecar command timed out; restarting sidecar to clear any stale output");
+                *inner = Self::spawn_inner().await?;
+                Err(ExecuteError::Timeout.into_anyhow())
+            }
+            Err(ExecuteError::Other(e)) if Self::is_dead(&mut inner) => {
                 error!("sidecar process died, restarting");
                 *inner = Self::spawn_inner().await?;
-                Self::execute_inner(&mut inner, id, &request_json, timeout_duration).await
+                Self::execute_inner(&mut inner, id, &request_json, timeout_duration)
+                    .await
+                    .map_err(|e| e.into_anyhow())
             }
-            Err(e) => Err(e),
+            Err(e) => Err(e.into_anyhow()),
         }
     }
 
@@ -120,19 +173,22 @@ impl SidecarClient {
         id: u64,
         request_json: &str,
         timeout_duration: Duration,
-    ) -> anyhow::Result<String> {
+    ) -> Result<String, ExecuteError> {
         inner.stdin.write_all(request_json.as_bytes()).await?;
         inner.stdin.write_all(b"\n").await?;
         inner.stdin.flush().await?;
 
-        let response = timeout(timeout_duration, inner.read_response()).await??;
+        let response = match timeout(timeout_duration, inner.read_response()).await {
+            Ok(Ok(response)) => response,
+            Ok(Err(e)) => return Err(ExecuteError::Other(e)),
+            Err(_elapsed) => return Err(ExecuteError::Timeout),
+        };
 
         if response.id != id {
-            anyhow::bail!(
-                "sidecar response id mismatch: expected {}, got {}",
-                id,
-                response.id
-            );
+            return Err(ExecuteError::Mismatch {
+                expected: id,
+                got: response.id,
+            });
         }
 
         if response.success {
@@ -143,12 +199,12 @@ impl SidecarClient {
                 category: "NotSpecified".to_string(),
                 fully_qualified_error_id: "Unknown".to_string(),
             });
-            anyhow::bail!(
+            Err(ExecuteError::Other(anyhow::anyhow!(
                 "PowerShell error: {} (category: {}, id: {})",
                 err.message,
                 err.category,
                 err.fully_qualified_error_id
-            )
+            )))
         }
     }
 
